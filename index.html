@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextGen POS PRO - 4:3 旗艦優化版</title>
+    <title>NextGen POS Pro v3.0 - 4:3 穩定版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -11,9 +11,10 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 50: '#f8fafc', 100: '#f1f5f9', 500: '#334155', 600: '#1e293b', 700: '#0f172a', 900: '#020617' },
+                        brand: { 500: '#1e293b', 600: '#0f172a', 700: '#020617' },
                         accent: { 500: '#3b82f6', 600: '#2563eb' },
-                        pay: { 500: '#10b981', 600: '#059669' }
+                        success: { 500: '#10b981', 600: '#059669' },
+                        danger: { 500: '#ef4444', 600: '#dc2626' }
                     }
                 }
             }
@@ -21,433 +22,327 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #94a3b8; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .pos-container { width: 1024px; height: 768px; background: #ffffff; box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5); border-radius: 0.75rem; overflow: hidden; display: flex; flex-direction: column; position: relative; }
         
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #475569; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+        }
+
+        /* 硬性鎖定 4:3 解析度容器 */
+        .pos-frame { 
+            width: 1024px; 
+            height: 768px; 
+            background: #ffffff; 
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+        }
+
         /* 滾動條美化 */
-        .hide-scroll::-webkit-scrollbar { width: 6px; }
-        .hide-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hide-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* 防文字換行撐開 */
+        .text-truncate-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+        .text-truncate-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
         
-        .btn-press:active { transform: scale(0.95); transition: transform 0.05s; }
-        .tab-content { display: none; }
-        .tab-content.active { display: flex; flex-direction: column; height: 100%; animation: slideUp 0.2s ease-out; }
-        
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .selected-item { background-color: #eff6ff; border-left: 4px solid #3b82f6; }
-        
-        /* 快捷鍵小標籤 */
-        .k-hint { font-size: 10px; position: absolute; top: 2px; right: 4px; color: #94a3b8; font-weight: bold; }
-        .active-mode { background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; }
+        .btn-press:active { transform: scale(0.96); }
+        .modal { display: none; position: absolute; inset: 0; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-<div class="pos-container">
-    <!-- ================= HEADER ================= -->
-    <header class="h-14 bg-brand-900 text-white flex items-center justify-between px-4 shrink-0 shadow-lg z-30">
+<div class="pos-frame">
+    <!-- ================= TOP HEADER (H: 56px) ================= -->
+    <header class="h-14 bg-brand-600 text-white flex items-center justify-between px-4 shrink-0 shadow-md">
         <div class="flex items-center gap-4">
-            <div class="flex flex-col border-r border-slate-700 pr-4">
-                <span class="text-xs text-slate-400 font-bold tracking-tighter">KS-SYSTEM v2.5</span>
-                <span class="text-xl font-black text-white leading-none">中山旗艦店</span>
+            <div class="border-r border-slate-700 pr-4">
+                <h1 class="text-xl font-black tracking-tighter">KS-SYSTEM <span class="text-accent-500">PRO</span></h1>
             </div>
-            <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span class="text-xs font-medium">系統連線中</span>
+            <div class="flex items-center gap-2 text-sm bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+                <i class="fa-solid fa-store text-accent-500"></i>
+                <span class="font-bold">中山旗艦店 - 01機</span>
             </div>
-        </div>
-        
-        <div class="flex items-center gap-3">
-            <div class="flex bg-slate-800 p-1 rounded-lg">
-                <button class="px-4 py-1 rounded bg-slate-700 text-xs font-bold text-white shadow-sm">一般銷售</button>
-                <button class="px-4 py-1 rounded text-xs font-bold text-slate-500 hover:text-slate-300">退貨處理</button>
-            </div>
-            <button onclick="openModal('vipModal')" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-1.5 rounded-full text-sm font-black flex items-center gap-2 btn-press shadow-lg">
-                <i class="fa-solid fa-crown"></i> 會員綁定 (F5)
-            </button>
         </div>
 
+        <!-- 狀態與時鐘 -->
         <div class="flex items-center gap-6">
-            <div class="text-right">
-                <div class="text-xl font-mono font-bold leading-none tracking-wider" id="clock">00:00:00</div>
-                <div class="text-[10px] text-slate-400 font-bold uppercase" id="currentDate">2023-10-25</div>
+            <div class="flex items-center gap-2 bg-slate-800/50 px-4 py-1.5 rounded-lg">
+                <i class="fa-solid fa-user-tie text-slate-400"></i>
+                <span class="text-sm font-bold">店長 王曉明</span>
             </div>
-            <button class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-slate-700 border border-slate-700">
-                <i class="fa-solid fa-gear"></i>
-            </button>
+            <div class="text-right leading-none">
+                <div id="clock" class="text-xl font-mono font-bold">12:00:00</div>
+                <div id="date" class="text-[10px] text-slate-400 font-bold uppercase mt-1">2023-10-25 WED</div>
+            </div>
         </div>
     </header>
 
     <!-- ================= MAIN BODY ================= -->
-    <main class="flex-1 flex overflow-hidden bg-slate-100">
+    <main class="flex-1 flex overflow-hidden">
         
-        <!-- ====== LEFT PANEL: 購物車列表 (已修復排版) ====== -->
-        <section class="w-[420px] bg-white flex flex-col border-r border-slate-200 z-10 shadow-xl">
-            <!-- 功能控制列 -->
-            <div class="p-2 grid grid-cols-4 gap-1.5 border-b border-slate-100 bg-slate-50">
-                <button class="bg-white border border-slate-200 py-2.5 rounded-lg flex flex-col items-center btn-press hover:bg-red-50 group">
-                    <i class="fa-solid fa-trash-can text-slate-400 group-hover:text-red-500 text-sm mb-0.5"></i>
-                    <span class="text-[10px] font-bold text-slate-500">清除交易</span>
+        <!-- ====== LEFT: SHOPPING CART (380px) ====== -->
+        <section class="w-[380px] flex flex-col bg-slate-50 border-r border-slate-200 shadow-sm relative z-10">
+            <!-- 購物車工具列 -->
+            <div class="p-2 grid grid-cols-4 gap-1 border-b border-slate-200">
+                <button class="flex flex-col items-center justify-center py-2 rounded bg-white border border-slate-300 btn-press group hover:bg-red-50 hover:border-red-200">
+                    <i class="fa-solid fa-trash-can text-slate-400 group-hover:text-red-500 text-sm"></i>
+                    <span class="text-[10px] font-bold text-slate-500 mt-1">全清</span>
                 </button>
-                <button class="bg-white border border-slate-200 py-2.5 rounded-lg flex flex-col items-center btn-press hover:bg-amber-50 group">
-                    <i class="fa-solid fa-pause text-slate-400 group-hover:text-amber-500 text-sm mb-0.5"></i>
-                    <span class="text-[10px] font-bold text-slate-500">暫存(F4)</span>
+                <button class="flex flex-col items-center justify-center py-2 rounded bg-white border border-slate-300 btn-press group hover:bg-amber-50 hover:border-amber-200">
+                    <i class="fa-solid fa-pause text-slate-400 group-hover:text-amber-500 text-sm"></i>
+                    <span class="text-[10px] font-bold text-slate-500 mt-1">掛帳</span>
                 </button>
-                <button class="bg-white border border-slate-200 py-2.5 rounded-lg flex flex-col items-center btn-press hover:bg-blue-50 group">
-                    <i class="fa-solid fa-tags text-slate-400 group-hover:text-blue-500 text-sm mb-0.5"></i>
-                    <span class="text-[10px] font-bold text-slate-500">整單折扣</span>
+                <button class="flex flex-col items-center justify-center py-2 rounded bg-white border border-slate-300 btn-press group hover:bg-blue-50 hover:border-blue-200">
+                    <i class="fa-solid fa-tag text-slate-400 group-hover:text-blue-500 text-sm"></i>
+                    <span class="text-[10px] font-bold text-slate-500 mt-1">折扣</span>
                 </button>
-                <button class="bg-white border border-slate-200 py-2.5 rounded-lg flex flex-col items-center btn-press hover:bg-slate-100 group">
-                    <i class="fa-solid fa-print text-slate-400 group-hover:text-slate-600 text-sm mb-0.5"></i>
-                    <span class="text-[10px] font-bold text-slate-500">重印單據</span>
+                <button class="flex flex-col items-center justify-center py-2 rounded bg-white border border-slate-300 btn-press group hover:bg-slate-100">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-400 group-hover:text-slate-700 text-sm"></i>
+                    <span class="text-[10px] font-bold text-slate-500 mt-1">紀錄</span>
                 </button>
             </div>
 
-            <!-- 列表標題 -->
-            <div class="bg-slate-800 text-white flex px-4 py-2.5 text-[11px] font-bold tracking-widest uppercase">
-                <div class="w-8">項</div>
-                <div class="flex-1">品名 / 規格</div>
-                <div class="w-16 text-right">單價</div>
+            <!-- 購物車表頭 -->
+            <div class="flex px-3 py-2 bg-brand-500 text-white text-[11px] font-bold">
+                <div class="w-8 text-center">序</div>
+                <div class="flex-1 px-2">品名/規格</div>
                 <div class="w-12 text-center">數量</div>
                 <div class="w-20 text-right">小計</div>
             </div>
 
-            <!-- 購物車滾動清單 -->
-            <div class="flex-1 overflow-y-auto hide-scroll bg-slate-50/50">
-                <ul class="flex flex-col">
-                    <!-- Item 1 -->
-                    <li class="flex items-start py-4 px-4 border-b border-slate-100 selected-item transition-colors">
-                        <div class="w-8 text-xs font-bold text-blue-500 pt-1">01</div>
-                        <div class="flex-1">
-                            <div class="text-slate-900 font-black text-base leading-tight">招牌冰滴咖啡 (大)</div>
-                            <div class="flex gap-2 mt-1.5">
-                                <span class="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold border border-blue-200">去冰</span>
-                                <span class="bg-slate-200 text-slate-600 text-[10px] px-1.5 py-0.5 rounded font-bold">半糖</span>
+            <!-- 購物車品項列表 (滾動區) -->
+            <div class="flex-1 overflow-y-auto custom-scroll bg-white">
+                <ul id="cartList" class="flex flex-col">
+                    <!-- Item Template -->
+                    <li class="flex items-center px-3 py-3 border-b border-slate-100 bg-blue-50/30 border-l-4 border-l-accent-500">
+                        <div class="w-8 text-center text-xs font-bold text-blue-500">01</div>
+                        <div class="flex-1 px-2 min-w-0">
+                            <h4 class="text-sm font-black text-slate-800 text-truncate-1">招牌特濃冰滴咖啡 (大)</h4>
+                            <div class="flex gap-1 mt-1">
+                                <span class="px-1 py-0.5 bg-slate-200 text-[9px] font-bold rounded text-slate-600">去冰</span>
+                                <span class="px-1 py-0.5 bg-slate-200 text-[9px] font-bold rounded text-slate-600">無糖</span>
                             </div>
                         </div>
-                        <div class="w-16 text-right text-slate-400 text-sm font-bold pt-1">$ 120</div>
-                        <div class="w-12 text-center text-xl font-black text-slate-800">2</div>
-                        <div class="w-20 text-right text-xl font-black text-slate-900 pt-0.5">$ 240</div>
+                        <div class="w-12 text-center">
+                            <span class="text-lg font-black text-slate-800">2</span>
+                        </div>
+                        <div class="w-20 text-right">
+                            <span class="text-lg font-black text-slate-900">$ 240</span>
+                        </div>
                     </li>
-                    
-                    <!-- Item 2 -->
-                    <li class="flex items-start py-4 px-4 border-b border-slate-100 bg-white">
-                        <div class="w-8 text-xs font-bold text-slate-300 pt-1">02</div>
-                        <div class="flex-1">
-                            <div class="text-slate-800 font-bold text-base leading-tight text-ellipsis overflow-hidden">台灣嚴選椪柑 (箱)</div>
-                            <div class="flex gap-2 mt-1.5">
-                                <span class="bg-rose-50 text-rose-500 text-[10px] px-1.5 py-0.5 rounded font-bold border border-rose-100">特價活動</span>
-                            </div>
+
+                    <li class="flex items-center px-3 py-3 border-b border-slate-100 bg-white">
+                        <div class="w-8 text-center text-xs font-bold text-slate-400">02</div>
+                        <div class="flex-1 px-2 min-w-0 text-slate-700">
+                            <h4 class="text-sm font-bold text-truncate-1">台灣嚴選椪柑 (箱) 季節限定商品</h4>
+                            <p class="text-[10px] text-rose-500 font-bold mt-1"><i class="fa-solid fa-star mr-1"></i>活動特價</p>
                         </div>
-                        <div class="w-16 text-right text-slate-400 text-sm font-bold pt-1">$ 45</div>
-                        <div class="w-12 text-center text-xl font-black text-slate-800">1</div>
-                        <div class="w-20 text-right text-xl font-black text-slate-800 pt-0.5">$ 45</div>
+                        <div class="w-12 text-center text-lg font-bold">1</div>
+                        <div class="w-20 text-right text-lg font-bold">$ 550</div>
                     </li>
                 </ul>
             </div>
 
-            <!-- 應付金額區塊 -->
-            <div class="bg-brand-900 text-white p-5 shadow-inner">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex items-center gap-3">
-                        <span class="text-slate-400 text-sm font-bold">品項: <span class="text-white">2</span></span>
-                        <span class="text-slate-400 text-sm font-bold">總數: <span class="text-white">3</span></span>
-                    </div>
-                    <span class="text-slate-400 text-sm">小計: $ 285</span>
+            <!-- 購物車底欄 (金額總計) -->
+            <div class="bg-brand-600 text-white p-5 shrink-0 shadow-[0_-10px_20px_rgba(0,0,0,0.1)]">
+                <div class="flex justify-between items-center text-xs text-slate-400 font-bold mb-1">
+                    <span>數量總計: <span class="text-white">3</span> 件</span>
+                    <span>稅額 (5%): $ 40</span>
                 </div>
-                <div class="flex justify-between items-center mb-4 text-rose-400">
-                    <span class="text-sm font-bold"><i class="fa-solid fa-circle-minus mr-1"></i>折扣優惠</span>
-                    <span class="text-lg font-black">- $ 0</span>
+                <div class="flex justify-between items-center text-sm font-bold text-rose-400 mb-3">
+                    <span>折扣減免</span>
+                    <span>- $ 0</span>
                 </div>
-                <div class="h-[2px] bg-slate-700 mb-4 rounded-full"></div>
+                <div class="border-t border-slate-700 my-3"></div>
                 <div class="flex justify-between items-end">
-                    <span class="text-slate-400 font-black text-lg pb-1.5">應收總額</span>
+                    <span class="text-lg font-black pb-1">應收總額</span>
                     <div class="text-right">
-                        <span class="text-slate-500 text-xs font-black block mb-1 uppercase tracking-tighter">Amount Due</span>
-                        <span class="text-5xl font-black text-pay-500 tracking-tighter" style="text-shadow: 0 0 20px rgba(16,185,129,0.3);">$ 285</span>
+                        <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 leading-none">Amount Due</span>
+                        <span id="grandTotal" class="text-5xl font-black text-success-500 tracking-tighter">$ 790</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ====== RIGHT PANEL: 商品與結帳控制區 ====== -->
-        <section class="flex-1 flex flex-col">
+        <!-- ====== RIGHT: ACTION PANEL (Flexible) ====== -->
+        <section class="flex-1 flex flex-col bg-slate-100 overflow-hidden">
             
-            <!-- 導覽分頁 -->
-            <nav class="bg-white border-b border-slate-200 flex px-3 py-2 gap-2 z-20 shadow-sm">
-                <button onclick="switchBaseTab('tab-products', this)" class="tab-btn active px-6 py-2.5 rounded-xl bg-slate-800 text-white font-black text-sm shadow-lg btn-press">
-                    <i class="fa-solid fa-box-archive mr-2"></i>快捷商品
-                </button>
-                <button onclick="switchBaseTab('tab-delivery', this)" class="tab-btn px-6 py-2.5 rounded-xl bg-white text-slate-500 font-bold text-sm hover:bg-slate-50 btn-press border border-slate-200">
-                    <i class="fa-solid fa-motorcycle mr-2"></i>外送網購
-                </button>
-                <button onclick="switchBaseTab('tab-services', this)" class="tab-btn px-6 py-2.5 rounded-xl bg-white text-slate-500 font-bold text-sm hover:bg-slate-50 btn-press border border-slate-200">
-                    <i class="fa-solid fa-ticket mr-2"></i>加值服務
-                </button>
+            <!-- 分類導航 (Fixed H) -->
+            <nav class="bg-white border-b border-slate-200 px-3 py-2 flex gap-2 shrink-0 overflow-hidden">
+                <button class="px-6 py-2.5 bg-brand-600 text-white rounded-xl font-black text-sm shadow-lg btn-press">快捷商品 (F1)</button>
+                <button class="px-6 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 btn-press">外送網購 (F2)</button>
+                <button class="px-6 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 btn-press">加值服務 (F3)</button>
             </nav>
 
-            <!-- 商品顯示區 -->
-            <div class="flex-1 relative p-3 overflow-hidden">
-                <div id="tab-products" class="tab-content active h-full">
-                    <div class="grid grid-cols-4 grid-rows-4 gap-2.5 h-full">
-                        <button class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-accent-500 flex flex-col p-3 relative btn-press group overflow-hidden">
-                            <span class="k-hint">1</span>
-                            <div class="flex-1 flex items-center justify-center">
-                                <div class="w-14 h-14 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-egg"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2 text-center">
-                                <span class="block text-sm font-black text-slate-800">茶葉蛋</span>
-                                <span class="block text-accent-600 text-xs font-black mt-0.5">$ 10</span>
-                            </div>
-                        </button>
-                        <!-- 其他商品略 (填充用) -->
-                        <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300"></div>
-                        <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300"></div>
-                        <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300"></div>
-                        <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300"></div>
-                        <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300"></div>
-                        <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300"></div>
-                        <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300"></div>
+            <!-- 商品方格 (可滾動) -->
+            <div class="flex-1 p-3 overflow-y-auto custom-scroll">
+                <div class="grid grid-cols-4 gap-3">
+                    <!-- Product Button -->
+                    <button class="bg-white rounded-2xl border-2 border-transparent hover:border-accent-500 shadow-sm p-3 flex flex-col items-center transition-all btn-press group overflow-hidden">
+                        <div class="w-16 h-16 rounded-3xl bg-orange-100 text-orange-500 flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-egg"></i>
+                        </div>
+                        <span class="text-sm font-black text-slate-800 text-truncate-1 w-full text-center">茶葉蛋</span>
+                        <span class="text-accent-600 text-xs font-black mt-1">$ 10</span>
+                    </button>
+                    <!-- Placeholder buttons -->
+                    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-32 flex flex-col items-center justify-center text-slate-400 text-xs font-bold">
+                        <i class="fa-solid fa-plus mb-2 text-xl"></i>自訂快捷
                     </div>
+                    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-32"></div>
+                    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-32"></div>
+                    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-32"></div>
+                    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-32"></div>
+                    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-32"></div>
+                    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 h-32"></div>
                 </div>
             </div>
 
-            <!-- ====== BOTTOM CONTROL: 結帳控制區 (補回核心功能) ====== -->
-            <div class="h-[280px] bg-slate-200 p-4 flex gap-4 border-t border-slate-300 shadow-2xl z-20">
+            <!-- ====== BOTTOM COMMAND CENTER (Fixed H: 300px) ====== -->
+            <div class="h-[300px] bg-slate-200 p-4 flex gap-4 border-t border-slate-300 shadow-2xl relative z-20">
                 
-                <!-- 數字鍵盤 -->
-                <div class="w-[220px] grid grid-cols-3 gap-1.5 shrink-0">
-                    <button onclick="appendNum('7')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">7</button>
-                    <button onclick="appendNum('8')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">8</button>
-                    <button onclick="appendNum('9')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">9</button>
-                    <button onclick="appendNum('4')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">4</button>
-                    <button onclick="appendNum('5')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">5</button>
-                    <button onclick="appendNum('6')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">6</button>
-                    <button onclick="appendNum('1')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">1</button>
-                    <button onclick="appendNum('2')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">2</button>
-                    <button onclick="appendNum('3')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">3</button>
-                    <button onclick="clearNum()" class="bg-slate-400 text-white font-black text-lg rounded-xl shadow btn-press">CLEAR</button>
-                    <button onclick="appendNum('0')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">0</button>
-                    <button onclick="appendNum('00')" class="bg-white font-black text-2xl rounded-xl shadow border border-slate-300 hover:bg-slate-50 btn-press">00</button>
+                <!-- 1. 數字鍵盤 (230px) -->
+                <div class="w-[230px] grid grid-cols-3 gap-2 shrink-0">
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">7</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">8</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">9</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">4</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">5</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">6</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">1</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">2</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">3</button>
+                    <button class="bg-slate-400 text-white font-black text-xl rounded-xl shadow-sm btn-press">CLR</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press">0</button>
+                    <button class="bg-white font-black text-2xl rounded-xl border border-slate-300 shadow-sm btn-press">00</button>
                 </div>
 
-                <!-- 支付與結帳面板 -->
+                <!-- 2. 支付面板與輸入 (Flexible) -->
                 <div class="flex-1 flex flex-col gap-3">
-                    <!-- 輸入框與基本功能 -->
+                    <!-- Barcode Input Row -->
                     <div class="flex gap-2">
-                        <div class="flex-1 h-14 bg-white rounded-xl border-2 border-brand-600 shadow-inner px-4 flex items-center focus-within:ring-4 focus-within:ring-brand-100 transition-all">
+                        <div class="flex-1 h-14 bg-white rounded-xl border-2 border-brand-500 shadow-inner px-4 flex items-center focus-within:ring-4 focus-within:ring-accent-100 transition-all">
                             <i class="fa-solid fa-barcode text-slate-400 text-2xl mr-4"></i>
-                            <input type="text" placeholder="輸入條碼或金額..." class="flex-1 text-2xl font-black text-slate-800 outline-none" id="barcodeInput">
+                            <input type="text" placeholder="刷讀條碼或輸入編號..." class="flex-1 text-2xl font-black text-slate-800 outline-none w-full" id="mainInput">
                         </div>
-                        <button class="w-24 bg-brand-700 text-white rounded-xl font-black text-lg btn-press shadow-md">ENTER</button>
+                        <button class="w-24 h-14 bg-brand-600 text-white rounded-xl font-black text-lg btn-press shadow-md">ENTER</button>
                     </div>
 
-                    <!-- 支付按鈕網格 (優化結帳動線) -->
-                    <div class="flex-1 grid grid-cols-4 grid-rows-2 gap-2.5">
+                    <!-- Payment Button Matrix -->
+                    <div class="flex-1 grid grid-cols-4 grid-rows-2 gap-2">
+                        <!-- 第一排 -->
                         <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm">
-                            <i class="fa-solid fa-qrcode text-slate-500 text-2xl mb-1 group-hover:text-blue-500"></i>
+                            <i class="fa-solid fa-qrcode text-slate-500 text-2xl mb-1 group-hover:text-accent-500"></i>
                             <span class="text-[11px] font-black text-slate-600">載具 / 統編</span>
                         </button>
                         <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm">
                             <i class="fa-solid fa-credit-card text-blue-500 text-2xl mb-1 group-hover:scale-110"></i>
                             <span class="text-[11px] font-black text-slate-600">信用卡</span>
                         </button>
-                        <!-- 現金結帳：特大按鈕 -->
-                        <button onclick="openModal('paymentModal')" class="bg-pay-500 text-white rounded-2xl flex flex-col items-center justify-center btn-press shadow-lg border-b-4 border-pay-700 hover:bg-pay-600">
-                            <i class="fa-solid fa-money-bill-wave text-3xl mb-1"></i>
-                            <span class="text-base font-black italic uppercase">Cash</span>
-                            <span class="text-[10px] font-bold">現金結帳</span>
+                        <!-- 重點結帳按鈕 (跨行) -->
+                        <button onclick="openModal('cashModal')" class="row-span-2 bg-success-500 text-white rounded-2xl flex flex-col items-center justify-center btn-press shadow-xl border-b-4 border-success-700 hover:bg-success-600">
+                            <i class="fa-solid fa-money-bill-wave text-4xl mb-2"></i>
+                            <span class="text-xl font-black italic">CASH</span>
+                            <span class="text-[10px] font-bold opacity-80 mt-1 uppercase tracking-widest">現金結帳</span>
                         </button>
-                        <!-- 小計按鈕：獨立且醒目 -->
-                        <button onclick="confirmSubtotal()" class="row-span-2 bg-accent-600 text-white rounded-2xl flex flex-col items-center justify-center btn-press shadow-lg border-b-4 border-accent-800 hover:bg-accent-700">
-                            <span class="text-xs font-black opacity-80 uppercase tracking-widest mb-1">Subtotal</span>
-                            <span class="text-4xl font-black mb-2">結帳</span>
-                            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">快捷鍵 Enter</span>
+                        <button onclick="openModal('paymentModal')" class="row-span-2 bg-accent-600 text-white rounded-2xl flex flex-col items-center justify-center btn-press shadow-xl border-b-4 border-accent-800 hover:bg-accent-700">
+                            <i class="fa-solid fa-calculator text-4xl mb-2"></i>
+                            <span class="text-xl font-black uppercase tracking-widest">結帳</span>
+                            <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full mt-1">F12</span>
                         </button>
                         
+                        <!-- 第二排 -->
                         <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm">
-                            <i class="fa-brands fa-apple text-slate-800 text-2xl mb-1 group-hover:scale-110"></i>
+                            <i class="fa-brands fa-apple text-slate-800 text-2xl mb-1 group-hover:scale-110 transition-transform"></i>
                             <span class="text-[11px] font-black text-slate-600">行動支付</span>
                         </button>
                         <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm">
-                            <i class="fa-solid fa-gift text-rose-500 text-2xl mb-1 group-hover:scale-110"></i>
-                            <span class="text-[11px] font-black text-slate-600">禮券 / 票券</span>
-                        </button>
-                        <button class="bg-slate-700 text-white rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm">
-                            <i class="fa-solid fa-ellipsis text-slate-400 text-xl mb-1"></i>
-                            <span class="text-[11px] font-black uppercase">More</span>
+                            <i class="fa-solid fa-wallet text-amber-500 text-2xl mb-1 group-hover:scale-110"></i>
+                            <span class="text-[11px] font-black text-slate-600">儲值支付</span>
                         </button>
                     </div>
                 </div>
-
             </div>
-
         </section>
     </main>
 </div>
 
 <!-- ================= MODALS ================= -->
 
-<!-- 現金結帳 Modal (優化快速按鈕) -->
-<div id="paymentModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-white w-[540px] rounded-3xl shadow-2xl overflow-hidden animate-slideUp">
-        <div class="bg-pay-600 text-white px-6 py-4 flex justify-between items-center">
-            <h3 class="font-black text-xl tracking-wide"><i class="fa-solid fa-cash-register mr-3"></i>現金收銀確認</h3>
-            <button onclick="closeModal('paymentModal')" class="w-10 h-10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+<!-- 1. 現金結帳視窗 -->
+<div id="cashModal" class="modal">
+    <div class="bg-white w-[500px] rounded-3xl shadow-2xl overflow-hidden animate-bounce-in">
+        <div class="bg-success-600 text-white px-6 py-4 flex justify-between items-center">
+            <h3 class="font-black text-xl"><i class="fa-solid fa-cash-register mr-3"></i>收銀確認</h3>
+            <button onclick="closeModal('cashModal')"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
-        
         <div class="p-8 flex flex-col gap-6">
             <div class="flex justify-between items-center bg-slate-50 p-5 rounded-2xl border border-slate-100">
                 <span class="text-slate-500 font-black text-lg">應收金額</span>
-                <span class="text-5xl font-black text-slate-900">$ 285</span>
+                <span class="text-5xl font-black text-slate-900">$ 790</span>
             </div>
-            
-            <div class="flex flex-col gap-3">
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-sm font-black text-slate-400">實收現金</span>
-                    <span class="text-xs font-bold text-accent-500">按 Enter 確認</span>
-                </div>
-                <div class="relative">
-                    <input type="text" id="paidInput" class="w-full text-5xl font-black text-right p-5 bg-white border-2 border-pay-500 rounded-2xl outline-none text-pay-600 focus:ring-4 focus:ring-pay-100" value="1000">
-                    <span class="absolute left-6 top-1/2 -translate-y-1/2 text-pay-300 text-2xl font-black">TWD</span>
-                </div>
-                
-                <!-- 快速面額按鈕 -->
+            <div class="flex flex-col gap-2">
+                <span class="text-sm font-black text-slate-400 px-1 uppercase tracking-widest">實收現金</span>
+                <input type="text" value="1000" class="w-full text-5xl font-black text-right p-5 bg-white border-2 border-success-500 rounded-2xl outline-none text-success-600 focus:ring-4 focus:ring-success-50">
                 <div class="grid grid-cols-4 gap-2 mt-2">
-                    <button class="py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-black text-slate-600 btn-press">正好</button>
-                    <button class="py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-black text-slate-600 btn-press">500</button>
-                    <button class="py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-black text-slate-600 btn-press">1000</button>
-                    <button class="py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-black text-slate-600 btn-press">2000</button>
+                    <button class="py-3 bg-slate-100 font-bold rounded-xl btn-press">正好</button>
+                    <button class="py-3 bg-slate-100 font-bold rounded-xl btn-press">500</button>
+                    <button class="py-3 bg-slate-100 font-bold rounded-xl btn-press">1000</button>
+                    <button class="py-3 bg-slate-100 font-bold rounded-xl btn-press">2000</button>
                 </div>
             </div>
-
             <div class="h-px bg-slate-100"></div>
-
             <div class="flex justify-between items-end">
-                <span class="text-slate-500 font-black text-lg">找零金額</span>
-                <span class="text-6xl font-black text-rose-500 animate-pulse">$ 715</span>
+                <span class="text-slate-500 font-black text-lg">找零</span>
+                <span class="text-5xl font-black text-danger-500">$ 210</span>
             </div>
         </div>
-        
         <div class="p-6 bg-slate-50 border-t border-slate-100 grid grid-cols-2 gap-4">
-            <button onclick="closeModal('paymentModal')" class="py-4 bg-slate-200 text-slate-600 font-black rounded-2xl hover:bg-slate-300 btn-press">返回修改 (ESC)</button>
-            <button onclick="completeOrder()" class="py-4 bg-pay-500 text-white font-black rounded-2xl hover:bg-pay-600 shadow-lg border-b-4 border-pay-700 btn-press text-xl">確認收錢 (ENTER)</button>
-        </div>
-    </div>
-</div>
-
-<!-- VIP 查詢 Modal -->
-<div id="vipModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center">
-    <div class="bg-white w-[420px] rounded-3xl shadow-2xl overflow-hidden">
-        <div class="bg-amber-500 text-white px-6 py-4 flex justify-between items-center">
-            <h3 class="font-black text-lg"><i class="fa-solid fa-crown mr-2"></i>會員查詢 / 綁定</h3>
-            <button onclick="closeModal('vipModal')"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="p-6">
-            <input type="text" placeholder="輸入手機號碼 / 卡號" class="w-full text-3xl font-black border-2 border-amber-300 rounded-2xl p-4 outline-none text-center focus:ring-4 focus:ring-amber-50">
-        </div>
-        <div class="p-4 bg-slate-50 flex gap-2">
-            <button onclick="closeModal('vipModal')" class="flex-1 py-3 bg-slate-200 rounded-xl font-bold">取消</button>
-            <button onclick="closeModal('vipModal')" class="flex-1 py-3 bg-amber-500 text-white rounded-xl font-bold">確認</button>
+            <button onclick="closeModal('cashModal')" class="py-4 bg-slate-200 text-slate-600 font-black rounded-2xl btn-press">取消 (ESC)</button>
+            <button onclick="closeModal('cashModal')" class="py-4 bg-success-500 text-white font-black rounded-2xl shadow-lg border-b-4 border-success-700 btn-press text-xl">確認付款 (ENTER)</button>
         </div>
     </div>
 </div>
 
 <script>
-    // JS Logic for Tabs
-    function switchBaseTab(tabId, el) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('nav .tab-btn').forEach(btn => {
-            btn.classList.remove('active', 'bg-slate-800', 'text-white', 'shadow-lg');
-            btn.classList.add('bg-white', 'text-slate-500');
-        });
-        
-        document.getElementById(tabId).classList.add('active');
-        el.classList.remove('bg-white', 'text-slate-500');
-        el.classList.add('active', 'bg-slate-800', 'text-white', 'shadow-lg');
-        document.getElementById('barcodeInput').focus();
-    }
-
-    // Numpad Functions
-    function appendNum(num) {
-        const input = document.activeElement.tagName === 'INPUT' ? document.activeElement : document.getElementById('barcodeInput');
-        input.value += num;
-        input.focus();
-    }
-    function clearNum() {
-        const input = document.activeElement.tagName === 'INPUT' ? document.activeElement : document.getElementById('barcodeInput');
-        input.value = '';
-    }
-
-    // Time & Date
+    // JS Logic for Clock
     function updateClock() {
         const now = new Date();
+        const options = { weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' };
         document.getElementById('clock').textContent = now.toLocaleTimeString('zh-TW', { hour12: false });
-        document.getElementById('currentDate').textContent = now.toISOString().split('T')[0] + " " + ["日","一","二","三","四","五","六"][now.getDay()];
+        document.getElementById('date').textContent = now.toLocaleDateString('en-US', options).toUpperCase();
     }
     setInterval(updateClock, 1000);
     updateClock();
 
     // Modal Control
     function openModal(id) {
-        const modal = document.getElementById(id);
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        if (id === 'paymentModal') document.getElementById('paidInput').select();
+        document.getElementById(id).classList.add('active');
     }
     function closeModal(id) {
-        const modal = document.getElementById(id);
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.getElementById('barcodeInput').focus();
-    }
-    
-    // Checkout Flow Logic
-    function confirmSubtotal() {
-        // 模擬結帳的第一步：計算金額
-        const btn = document.querySelector('.bg-accent-600');
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-2xl"></i>';
-        setTimeout(() => {
-            openModal('paymentModal');
-            btn.innerHTML = '<span class="text-xs font-black opacity-80 uppercase tracking-widest mb-1">Subtotal</span><span class="text-4xl font-black mb-2">結帳</span><span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">快捷鍵 Enter</span>';
-        }, 500);
+        document.getElementById(id).classList.remove('active');
+        document.getElementById('mainInput').focus();
     }
 
-    function completeOrder() {
-        closeModal('paymentModal');
-        // 模擬訂單完成效果
-        const totalDisplay = document.querySelector('.text-pay-500');
-        totalDisplay.innerHTML = 'SUCCESS';
-        totalDisplay.classList.replace('text-pay-500', 'text-blue-500');
-        setTimeout(() => {
-            totalDisplay.innerHTML = '$ 0';
-            totalDisplay.classList.replace('text-blue-500', 'text-pay-500');
-            clearNum();
-        }, 2000);
-    }
+    // Auto focus barcode input
+    window.onload = () => {
+        document.getElementById('mainInput').focus();
+    };
 
-    // Key Events
-    document.addEventListener('keydown', (e) => {
-        const anyModalActive = !document.getElementById('paymentModal').classList.contains('hidden') || 
-                               !document.getElementById('vipModal').classList.contains('hidden');
-        
-        if (!anyModalActive && e.key === 'Enter') {
-            confirmSubtotal();
-        }
-        if (anyModalActive && e.key === 'Enter') {
-            completeOrder();
-        }
-        if (e.key === 'Escape') {
-            closeModal('paymentModal');
-            closeModal('vipModal');
-        }
-        // Auto focus barcode input
-        if (!anyModalActive && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-            document.getElementById('barcodeInput').focus();
-        }
+    // Global Key Events
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12') openModal('cashModal');
+        if (e.key === 'Escape') closeModal('cashModal');
     });
 </script>
 
