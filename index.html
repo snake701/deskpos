@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextGen POS Pro v3.7 - 極致回饋版</title>
+    <title>NextGen POS Pro v3.8 - 全中文互動強化版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -36,41 +36,35 @@
         /* 全域按鈕按壓感 */
         .btn-press:active { transform: scale(0.92); transition: transform 0.05s; }
         
+        /* 購物車展開動畫 */
         .expand-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .active-item .expand-panel { max-height: 80px; }
         
+        /* 跑馬燈動畫 - 速度減慢至 40s */
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; }
+        .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 40s linear infinite; }
         .marquee-content:hover { animation-play-state: paused; }
 
+        /* 霧化與視窗彈出 */
         .modal { display: none; position: absolute; inset: 0; z-index: 100; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
         .modal.active { display: flex; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* 斑馬紋列表 */
         #cartList li:nth-child(even) { background-color: #f8fafc; }
         
-        /* 客製化按鈕：核心回饋強化 */
+        /* 客製化按鈕回饋強化 */
         .option-btn { 
-            @apply px-3 py-3 border-2 border-slate-200 rounded-2xl text-[13px] font-black text-slate-500 transition-all bg-white relative overflow-hidden;
+            @apply px-3 py-3 border-2 border-slate-200 rounded-2xl text-[13px] font-black text-slate-500 transition-all bg-white relative overflow-hidden btn-press;
             box-shadow: 0 2px 0 0 rgba(226, 232, 240, 1);
         }
-        
-        .option-btn:hover { @apply border-slate-300 bg-slate-50; }
-        
-        /* 按下去的瞬間：縮小且陰影內凹 */
-        .option-btn:active { 
-            transform: scale(0.9);
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-        }
-        
-        /* 被選中的狀態：發光、變色、稍微彈起 */
         .option-btn.active { 
             @apply bg-accent-500 text-white border-accent-600 scale-105 z-10;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
-        /* 斑馬紋列表選中色 */
+        /* 列表中被選中的品項顏色 */
         .active-item-row { background-color: #fbbf24 !important; }
     </style>
 </head>
@@ -80,13 +74,30 @@
     <!-- ================= TOP HEADER ================= -->
     <header class="h-14 bg-brand-600 text-white flex items-center justify-between px-4 shrink-0 shadow-md">
         <div class="flex items-center gap-4">
-            <h1 class="text-xl font-black tracking-tighter">KS-SYSTEM <span class="text-accent-500">PRO</span></h1>
-            <div class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-xs font-bold uppercase tracking-widest">Store 01 - Pro Mode</div>
+            <h1 class="text-xl font-black tracking-tighter">KS-收銀系統 <span class="text-accent-500">PRO</span></h1>
+            <div class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-[11px] font-bold tracking-widest text-slate-300">中山旗艦店 - 01機</div>
         </div>
+
+        <!-- 功能按鈕區 -->
+        <div class="flex items-center gap-2">
+            <button onclick="openModal('memberModal')" class="bg-accent-500 hover:bg-accent-600 text-white px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-2 btn-press shadow-lg border-b-2 border-accent-700">
+                <i class="fa-solid fa-crown"></i> 會員功能 (F5)
+            </button>
+            <button class="w-9 h-9 bg-slate-800 rounded-full flex items-center justify-center hover:bg-slate-700 btn-press text-slate-300 border border-slate-700">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+
         <div class="flex items-center gap-6">
+            <!-- 連線狀態 -->
+            <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                <div class="w-2 h-2 bg-success-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                <span class="text-[10px] font-black text-slate-300">連線正常</span>
+            </div>
+            
             <div class="text-right leading-none">
                 <div id="clock" class="text-xl font-mono font-bold tracking-widest text-accent-400">12:00:00</div>
-                <div id="date" class="text-[10px] text-slate-400 font-bold uppercase mt-1">2023-10-25 WED</div>
+                <div id="date" class="text-[10px] text-slate-400 font-bold uppercase mt-1">2023-10-25 (三)</div>
             </div>
         </div>
     </header>
@@ -95,30 +106,31 @@
     <main class="flex-1 flex overflow-hidden">
         
         <!-- ====== LEFT: SHOPPING CART ====== -->
-        <section class="w-[380px] flex flex-col bg-slate-50 border-r border-slate-200 relative z-10">
-            <div class="flex px-3 py-2 bg-brand-500 text-white text-[11px] font-bold uppercase tracking-widest">
-                <div class="w-8 text-center">No</div>
-                <div class="flex-1 px-2">Item / Custom</div>
-                <div class="w-10 text-center">Qty</div>
-                <div class="w-20 text-right">Price</div>
+        <section class="w-[380px] flex flex-col bg-slate-50 border-r border-slate-200 relative z-10 shadow-lg">
+            <div class="flex px-3 py-2 bg-brand-500 text-white text-[11px] font-bold tracking-widest">
+                <div class="w-8 text-center">項次</div>
+                <div class="flex-1 px-2">品名 / 客製化</div>
+                <div class="w-10 text-center">數量</div>
+                <div class="w-20 text-right">小計</div>
             </div>
 
             <div class="flex-1 overflow-y-auto custom-scroll bg-white">
                 <ul id="cartList" class="flex flex-col">
-                    <!-- 商品行動態生成 -->
+                    <!-- 商品行將透過 JS 動態生成 -->
                 </ul>
             </div>
 
+            <!-- 金額總計區 -->
             <div class="bg-brand-700 text-white p-5 shrink-0 shadow-2xl">
-                <div class="flex justify-between items-center text-xs text-slate-400 font-bold mb-1 uppercase tracking-tighter">
-                    <span id="itemCount">Items: 0</span>
-                    <span>Tax Included (5%)</span>
+                <div class="flex justify-between items-center text-xs text-slate-400 font-bold mb-1">
+                    <span id="itemCount">品項總計: 0 項</span>
+                    <span>內含稅額 (5%)</span>
                 </div>
                 <div class="border-t border-slate-500/30 my-3"></div>
                 <div class="flex justify-between items-end">
-                    <span class="text-lg font-black pb-1 uppercase">Total</span>
+                    <span class="text-lg font-black pb-1">應付總額</span>
                     <div class="text-right">
-                        <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 leading-none">Amount Due</span>
+                        <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1 leading-none tracking-tighter">Amount Due</span>
                         <span id="grandTotal" class="text-5xl font-black text-success-500 tracking-tighter">$ 0</span>
                     </div>
                 </div>
@@ -127,11 +139,14 @@
 
         <!-- ====== RIGHT: ACTION PANEL ====== -->
         <section class="flex-1 flex flex-col bg-slate-100 overflow-hidden">
+            <!-- 分類選單 -->
             <nav class="bg-white border-b border-slate-200 px-3 py-2 flex gap-2 shrink-0">
                 <button class="px-6 py-2.5 bg-brand-600 text-white rounded-xl font-black text-sm shadow-lg btn-press">快捷商品 (F1)</button>
-                <button class="px-6 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 btn-press">其他服務</button>
+                <button class="px-6 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 btn-press">外送網購 (F2)</button>
+                <button class="px-6 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 btn-press">加值服務 (F3)</button>
             </nav>
 
+            <!-- 商品方格 -->
             <div class="flex-1 p-3 overflow-y-auto custom-scroll">
                 <div class="grid grid-cols-4 gap-3">
                     <button onclick="checkCustomization('招牌特濃冰滴咖啡', 120, true)" class="bg-white rounded-3xl border-2 border-transparent hover:border-accent-500 shadow-sm p-4 flex flex-col items-center transition-all btn-press group">
@@ -148,11 +163,14 @@
                         <span class="text-sm font-black text-slate-800 text-center">嚴選椪柑</span>
                         <span class="text-accent-600 text-xs font-black mt-1">$ 450</span>
                     </button>
+                    <!-- 其他佔位 -->
+                    <div class="bg-slate-50 rounded-3xl border border-dashed border-slate-300 h-32"></div>
                 </div>
             </div>
 
             <!-- ====== BOTTOM COMMAND CENTER ====== -->
             <div class="h-[250px] bg-slate-200 p-3 flex gap-3 border-t border-slate-300 z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                <!-- 數字鍵盤 -->
                 <div class="w-[200px] grid grid-cols-3 gap-1.5 shrink-0">
                     <button class="bg-white font-black text-xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">7</button>
                     <button class="bg-white font-black text-xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">8</button>
@@ -163,31 +181,33 @@
                     <button class="bg-white font-black text-xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">1</button>
                     <button class="bg-white font-black text-xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">2</button>
                     <button class="bg-white font-black text-xl rounded-xl border border-slate-300 shadow-sm btn-press active:bg-slate-100">3</button>
-                    <button class="bg-slate-400 text-white font-black rounded-xl btn-press">CLR</button>
+                    <button class="bg-slate-400 text-white font-black rounded-xl btn-press">清除</button>
                     <button class="bg-white font-black text-xl rounded-xl border border-slate-300 shadow-sm btn-press">0</button>
-                    <button class="bg-brand-600 text-white font-black rounded-xl btn-press shadow-md">ENT</button>
+                    <button class="bg-brand-600 text-white font-black rounded-xl btn-press shadow-md">確認</button>
                 </div>
+
+                <!-- 輸入與結帳按鈕區 -->
                 <div class="flex-1 flex flex-col gap-2">
                     <div class="h-12 bg-white rounded-xl border-2 border-brand-500 shadow-inner px-4 flex items-center">
                         <i class="fa-solid fa-barcode text-slate-400 text-xl mr-3"></i>
-                        <input type="text" placeholder="刷讀條碼或輸入編號..." class="flex-1 text-xl font-black text-slate-800 outline-none bg-transparent" id="mainInput">
+                        <input type="text" placeholder="請刷入商品條碼或手動輸入..." class="flex-1 text-xl font-black text-slate-800 outline-none bg-transparent" id="mainInput">
                     </div>
                     <div class="flex-1 grid grid-cols-4 gap-2">
                         <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm">
                             <i class="fa-solid fa-qrcode text-slate-500 text-xl mb-1"></i>
-                            <span class="text-[10px] font-black text-slate-600 uppercase">Carrier</span>
+                            <span class="text-[10px] font-black text-slate-600 uppercase">手機載具</span>
                         </button>
                         <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm">
                             <i class="fa-solid fa-credit-card text-blue-500 text-xl mb-1"></i>
-                            <span class="text-[10px] font-black text-slate-600 uppercase">Card</span>
+                            <span class="text-[10px] font-black text-slate-600 uppercase">信用卡</span>
                         </button>
                         <button class="bg-success-500 text-white rounded-2xl flex flex-col items-center justify-center btn-press shadow-lg border-b-4 border-success-700">
                             <i class="fa-solid fa-money-bill-wave text-2xl mb-1"></i>
-                            <span class="text-xs font-black uppercase tracking-widest italic">Cash</span>
+                            <span class="text-sm font-black uppercase tracking-widest italic">現金結帳</span>
                         </button>
                         <button class="bg-accent-600 text-white rounded-2xl flex flex-col items-center justify-center btn-press shadow-lg border-b-4 border-accent-800">
                             <span class="text-lg font-black uppercase tracking-widest leading-none">結帳</span>
-                            <span class="text-[9px] font-bold opacity-70 mt-1 uppercase">Pay Total</span>
+                            <span class="text-[9px] font-bold opacity-70 mt-1 uppercase">小計</span>
                         </button>
                     </div>
                 </div>
@@ -197,19 +217,41 @@
 
     <!-- ================= FOOTER ================= -->
     <footer onclick="openModal('msgModal')" class="h-8 bg-brand-600 text-white flex items-center overflow-hidden cursor-pointer hover:bg-brand-700 transition-colors">
-        <div class="bg-danger-500 px-3 h-full flex items-center font-black text-[10px] z-10 shadow-lg tracking-widest">URGENT</div>
+        <div class="bg-danger-500 px-3 h-full flex items-center font-black text-[10px] z-10 shadow-lg tracking-widest">緊急公告</div>
         <div class="flex-1 relative overflow-hidden h-full flex items-center bg-slate-800">
-            <div class="marquee-content font-bold text-[11px] text-slate-100 italic">
-                ⚠️ 注意：今日起會員系統進行例行維修，部分積分可能延遲入帳。 ● 促銷：買咖啡送愛心餅乾活動實施中。 ● 提醒：請記得詢問客戶是否需要載具。
+            <div class="marquee-content font-bold text-[11px] text-slate-100">
+                ⚠️ 注意：今日起會員系統進行例行維修，部分積分可能延遲入帳。 ● 促銷活動：全店購買咖啡加購甜點現折 20 元。 ● 提醒：請記得詢問客戶是否需要發票載具。 ● 系統通知：本日 24:00 進行電子發票備份。
             </div>
         </div>
-        <div class="px-3 text-[10px] font-black text-slate-400 bg-brand-600 h-full flex items-center border-l border-slate-700">INFO <i class="fa-solid fa-circle-info ml-1 text-accent-400"></i></div>
+        <div class="px-3 text-[10px] font-black text-slate-400 bg-brand-600 h-full flex items-center border-l border-slate-700">訊息中心 <i class="fa-solid fa-circle-info ml-1 text-accent-400"></i></div>
     </footer>
 </div>
 
 <!-- ================= MODALS ================= -->
 
-<!-- 1. 飲品客製化 Modal (極致回饋強化版) -->
+<!-- 1. 會員查詢 Modal -->
+<div id="memberModal" class="modal">
+    <div class="bg-white w-[420px] rounded-[2.5rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
+        <div class="bg-accent-600 text-white px-8 py-5 flex justify-between items-center">
+            <h3 class="font-black text-xl tracking-tighter"><i class="fa-solid fa-user-tag mr-3"></i>會員查詢與綁定</h3>
+            <button onclick="closeModal('memberModal')" class="w-10 h-10 hover:bg-white/10 rounded-full flex items-center justify-center btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="p-8 flex flex-col gap-6">
+            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">請刷讀會員條碼或輸入手機</p>
+            <input type="text" placeholder="手機號碼 / 會員卡號" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-2xl font-black outline-none focus:border-accent-500 text-center shadow-inner">
+            <div class="grid grid-cols-2 gap-3">
+                <button class="py-3 bg-slate-100 rounded-xl font-black text-slate-600 hover:bg-slate-200">條碼掃描</button>
+                <button class="py-3 bg-slate-100 rounded-xl font-black text-slate-600 hover:bg-slate-200">實體卡</button>
+            </div>
+        </div>
+        <div class="px-8 pb-8 flex gap-3">
+            <button onclick="closeModal('memberModal')" class="flex-1 py-4 bg-slate-200 text-slate-500 font-black rounded-2xl btn-press">取消</button>
+            <button onclick="closeModal('memberModal')" class="flex-1 py-4 bg-accent-600 text-white font-black rounded-2xl shadow-lg btn-press">查詢會員</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 飲品客製化 Modal -->
 <div id="drinkCustomModal" class="modal">
     <div class="bg-white w-[520px] rounded-[2.5rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
         <div class="bg-brand-600 text-white px-8 py-5 flex justify-between items-center">
@@ -217,21 +259,15 @@
             <button onclick="closeModal('drinkCustomModal')" class="w-10 h-10 hover:bg-white/10 rounded-full flex items-center justify-center transition-all active:scale-90"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         <div class="p-8 flex flex-col gap-6">
-            <!-- 溫度 -->
             <div>
-                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">溫度設定 Temperature</label>
+                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">溫度設定</label>
                 <div class="flex gap-3">
-                    <button class="option-btn flex-1" data-type="temp" data-value="冰" onclick="setOption('temp', '冰')">
-                        <i class="fa-solid fa-snowflake mr-2 opacity-50"></i>冰飲 COLD
-                    </button>
-                    <button class="option-btn flex-1" data-type="temp" data-value="熱" onclick="setOption('temp', '熱')">
-                        <i class="fa-solid fa-fire-flame-curved mr-2 opacity-50"></i>熱飲 HOT
-                    </button>
+                    <button class="option-btn flex-1" data-type="temp" data-value="冰" onclick="setOption('temp', '冰')"><i class="fa-solid fa-snowflake mr-2 opacity-50"></i>冰飲</button>
+                    <button class="option-btn flex-1" data-type="temp" data-value="熱" onclick="setOption('temp', '熱')"><i class="fa-solid fa-fire-flame-curved mr-2 opacity-50"></i>熱飲</button>
                 </div>
             </div>
-            <!-- 冰塊 -->
             <div id="iceSection">
-                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">冰塊量 Ice Level</label>
+                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">冰塊量</label>
                 <div class="grid grid-cols-5 gap-2">
                     <button class="option-btn" data-type="ice" data-value="正常" onclick="setOption('ice', '正常')">正常</button>
                     <button class="option-btn" data-type="ice" data-value="少冰" onclick="setOption('ice', '少冰')">少冰</button>
@@ -240,9 +276,8 @@
                     <button class="option-btn" data-type="ice" data-value="完去" onclick="setOption('ice', '完去')">完去</button>
                 </div>
             </div>
-            <!-- 甜度 -->
             <div>
-                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">甜度選擇 Sugar Level</label>
+                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">甜度選擇</label>
                 <div class="grid grid-cols-4 gap-2">
                     <button class="option-btn" data-type="sugar" data-value="正常" onclick="setOption('sugar', '正常')">正常</button>
                     <button class="option-btn" data-type="sugar" data-value="七分" onclick="setOption('sugar', '七分')">7分</button>
@@ -252,23 +287,36 @@
                     <button class="option-btn" data-type="sugar" data-value="無糖" onclick="setOption('sugar', '無糖')">無糖</button>
                 </div>
             </div>
-            <!-- 備註 -->
             <div>
-                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">特別備註 Remark</label>
+                <label class="text-[11px] font-black text-slate-400 block mb-3 uppercase tracking-[0.2em]">特別備註</label>
                 <input type="text" id="customNote" placeholder="例如：自備杯、加厚、加珍珠..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-sm font-black outline-none focus:border-accent-500 focus:bg-white transition-all shadow-inner">
             </div>
         </div>
         <div class="px-8 pb-8 flex gap-4">
             <button onclick="closeModal('drinkCustomModal')" class="flex-1 py-5 bg-slate-100 text-slate-500 font-black rounded-[1.5rem] btn-press border border-slate-200">放棄返回</button>
-            <button onclick="saveDrinkCustom()" class="flex-[1.5] py-5 bg-accent-600 text-white font-black rounded-[1.5rem] shadow-[0_8px_25px_rgba(37,99,235,0.4)] btn-press text-xl border-b-4 border-accent-800">
-                確認完成 (SAVE)
-            </button>
+            <button onclick="saveDrinkCustom()" class="flex-[1.5] py-5 bg-accent-600 text-white font-black rounded-[1.5rem] shadow-lg btn-press text-xl border-b-4 border-accent-800">儲存客製</button>
         </div>
     </div>
 </div>
 
-<!-- 公告 Modal -->
-<div id="msgModal" class="modal">...</div>
+<!-- 訊息公告 Modal -->
+<div id="msgModal" class="modal">
+    <div class="bg-white w-[600px] rounded-3xl shadow-2xl overflow-hidden animate-slideUp">
+        <div class="bg-brand-600 text-white px-6 py-4 flex justify-between items-center">
+            <h3 class="font-black text-xl"><i class="fa-solid fa-bell mr-3"></i>訊息中心</h3>
+            <button onclick="closeModal('msgModal')" class="btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="p-6 max-h-[450px] overflow-y-auto custom-scroll flex flex-col gap-4">
+            <div class="p-4 bg-slate-50 border-l-4 border-accent-500 rounded-lg">
+                <p class="font-black text-slate-800">【促銷】全店購買咖啡加購甜點現折 20 元</p>
+                <p class="text-xs text-slate-500 mt-2">適用期間：即日起至 2023/11/30</p>
+            </div>
+        </div>
+        <div class="p-4 text-center bg-slate-50">
+            <button onclick="closeModal('msgModal')" class="px-8 py-2 bg-brand-600 text-white rounded-lg font-bold">關閉視窗</button>
+        </div>
+    </div>
+</div>
 
 <script>
     let cart = [];
@@ -336,13 +384,15 @@
         renderCart();
     }
 
-    function updateQty(index, delta) {
+    function updateQty(index, delta, event) {
+        if (event) event.stopPropagation();
         if (cart[index].isDeleted) return;
         cart[index].qty = Math.max(1, cart[index].qty + delta);
         renderCart();
     }
 
-    function toggleDelete(index) {
+    function toggleDelete(index, event) {
+        if (event) event.stopPropagation();
         cart[index].isDeleted = !cart[index].isDeleted;
         renderCart();
     }
@@ -363,19 +413,19 @@
             if (!item.isDeleted) { total += subtotal; count += item.qty; }
 
             const li = document.createElement('li');
-            li.className = `flex flex-col border-b border-slate-100 transition-all cursor-pointer ${isActive ? 'active-item-row' : ''}`;
+            li.className = `flex flex-col border-b border-slate-100 transition-all cursor-pointer ${isActive ? 'active-item' : ''}`;
             
             let customTags = '';
             if (item.custom) {
                 const iceText = item.custom.temp === '冰' ? ` / ${item.custom.ice}` : '';
-                customTags = `<p class="text-[10px] font-black ${isActive ? 'text-brand-700' : 'text-slate-400'} mt-1 uppercase">
+                customTags = `<p class="text-[10px] font-black ${isActive ? 'text-brand-900' : 'text-slate-400'} mt-1 uppercase">
                                 <i class="fa-solid fa-wand-magic-sparkles mr-1 text-accent-500"></i>${item.custom.temp}飲 / ${item.custom.sugar}${iceText}
                                 ${item.custom.note ? ' / ' + item.custom.note : ''}
                               </p>`;
             }
 
             li.innerHTML = `
-                <div class="flex items-center px-3 py-3" onclick="selectItem(${index})">
+                <div class="flex items-center px-3 py-3 ${isActive ? 'active-item-row' : ''}" onclick="selectItem(${index})">
                     <div class="w-8 text-center text-xs font-black ${isActive ? 'text-brand-900' : 'text-slate-300'}">${index + 1}</div>
                     <div class="flex-1 px-2 min-w-0">
                         <h4 class="text-sm font-black transition-all ${item.isDeleted ? 'line-through text-danger-500 opacity-50' : (isActive ? 'text-brand-900' : 'text-slate-800')}">${item.name}</h4>
@@ -388,15 +438,15 @@
                 <div class="expand-panel bg-white/40 shadow-inner">
                     <div class="flex items-center gap-2 p-3 h-full">
                         <div class="flex bg-white rounded-xl border border-slate-300 overflow-hidden shadow-sm">
-                            <button onclick="updateQty(${index}, -1)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button onclick="updateQty(${index}, -1, event)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-minus text-xs"></i></button>
                             <div class="w-12 h-10 flex items-center justify-center font-black text-sm text-slate-800 border-x border-slate-200">${item.qty}</div>
-                            <button onclick="updateQty(${index}, 1)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-plus text-xs"></i></button>
+                            <button onclick="updateQty(${index}, 1, event)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
                         ${item.custom ? `<button onclick="openDrinkModal(${index})" class="px-5 h-10 bg-white border border-slate-300 rounded-xl text-[11px] font-black text-slate-700 hover:bg-blue-50 btn-press shadow-sm">客製修改</button>` : ''}
                         <button class="px-5 h-10 bg-white border border-slate-300 rounded-xl text-[11px] font-black text-slate-700 hover:bg-amber-50 btn-press shadow-sm">折扣</button>
                         <div class="flex-1"></div>
-                        <button onclick="toggleDelete(${index})" class="px-5 h-10 ${item.isDeleted ? 'bg-slate-500' : 'bg-danger-500'} text-white rounded-xl text-[11px] font-black shadow-md btn-press uppercase tracking-widest">
-                            ${item.isDeleted ? 'Recover' : 'Void'}
+                        <button onclick="toggleDelete(${index}, event)" class="px-5 h-10 ${item.isDeleted ? 'bg-slate-500' : 'bg-danger-500'} text-white rounded-xl text-[11px] font-black shadow-md btn-press uppercase tracking-widest">
+                            ${item.isDeleted ? '恢復項目' : '更正項目'}
                         </button>
                     </div>
                 </div>
@@ -405,13 +455,13 @@
         });
 
         document.getElementById('grandTotal').textContent = `$ ${total.toLocaleString()}`;
-        document.getElementById('itemCount').textContent = `Items: ${count}`;
+        document.getElementById('itemCount').textContent = `品項總計: ${cart.length} 項`;
     }
 
     function updateClock() {
         const now = new Date();
         document.getElementById('clock').textContent = now.toLocaleTimeString('zh-TW', { hour12: false });
-        document.getElementById('date').textContent = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' }).toUpperCase();
+        document.getElementById('date').textContent = now.toLocaleDateString('zh-TW', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' });
     }
     setInterval(updateClock, 1000); updateClock();
 
@@ -427,3 +477,4 @@
 
 </body>
 </html>
+
