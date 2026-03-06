@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextGen POS Pro v4.5.5 - 全功能旗艦版</title>
+    <title>NextGen POS Pro v4.5.6 - 旗艦功能全修復版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -11,7 +11,7 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 500: '#1e293b', 600: '#0f172a', 700: '#334155' },
+                        brand: { 50: '#f8fafc', 500: '#1e293b', 600: '#0f172a', 700: '#334155' },
                         accent: { 400: '#fbbf24', 500: '#3b82f6', 600: '#2563eb' },
                         success: { 500: '#10b981', 600: '#059669' },
                         danger: { 500: '#ef4444', 600: '#dc2626' }
@@ -31,6 +31,8 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
+        .text-truncate-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+        
         /* 全域按鈕按壓感 */
         .btn-press:active { transform: scale(0.94); transition: transform 0.05s; }
         
@@ -38,7 +40,7 @@
         .expand-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .active-item .expand-panel { max-height: 120px; }
         
-        /* 斑馬紋樣式 (對比加重強化版) */
+        /* 斑馬紋樣式 (強化對比) */
         #cartList li:nth-child(even) { background-color: #edf2f7; } 
         #cartList li:nth-child(odd) { background-color: #ffffff; }
         
@@ -79,7 +81,7 @@
         <div class="flex items-center gap-6">
             <div class="flex flex-col">
                 <h1 class="text-xl font-black tracking-tighter leading-none text-white uppercase">KS-收銀系統 <span class="text-accent-500">PRO</span></h1>
-                <span class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest whitespace-nowrap">系統版本 v4.5.5-Stable</span>
+                <span class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest whitespace-nowrap">系統版本 v4.5.6-Stable</span>
             </div>
             <div class="h-8 w-px bg-slate-700 mx-2"></div>
             <div class="flex items-center gap-2">
@@ -113,7 +115,7 @@
     <!-- ================= MAIN BODY ================= -->
     <main class="flex-1 flex overflow-hidden">
         
-        <!-- ====== LEFT: SHOPPING CART ====== -->
+        <!-- ====== LEFT: SHOPPING CART (互動式 + 強化斑馬紋) ====== -->
         <section class="w-[380px] flex flex-col bg-slate-50 border-r border-slate-200 relative z-10 shadow-xl">
             <div class="flex px-3 py-2 bg-brand-500 text-white text-[11px] font-bold tracking-widest uppercase">
                 <div class="w-8 text-center">序號</div>
@@ -123,7 +125,9 @@
             </div>
 
             <div class="flex-1 overflow-y-auto custom-scroll bg-white">
-                <ul id="cartList" class="flex flex-col"></ul>
+                <ul id="cartList" class="flex flex-col">
+                    <!-- 內容透過 JS renderCart 生成 -->
+                </ul>
             </div>
 
             <div class="bg-brand-700 text-white p-5 shrink-0 shadow-2xl">
@@ -150,10 +154,12 @@
             </nav>
 
             <div class="flex-1 p-4 overflow-y-auto custom-scroll">
-                <div class="grid grid-cols-4 gap-4" id="productGrid"></div>
+                <div class="grid grid-cols-4 gap-4" id="productGrid">
+                    <!-- 商品按鈕動態生成 -->
+                </div>
             </div>
 
-            <!-- ====== BOTTOM COMMAND CENTER ====== -->
+            <!-- ====== BOTTOM COMMAND CENTER (v4.5.2 修正佈局) ====== -->
             <div class="h-[280px] bg-slate-200 p-4 flex gap-5 border-t border-slate-300 z-20 shadow-inner">
                 <!-- 數字鍵盤 -->
                 <div class="w-[240px] grid grid-cols-3 gap-2.5 shrink-0">
@@ -171,6 +177,7 @@
                     <button class="bg-brand-600 text-white font-black rounded-xl btn-press shadow-md" onclick="mainConfirm()">確認</button>
                 </div>
 
+                <!-- 功能面板與小計區 -->
                 <div class="flex-1 flex flex-col gap-2.5 relative overflow-visible">
                     <!-- 面板 1: 小計模式 -->
                     <div id="subtotalPanel" class="flex flex-col gap-2.5 h-full">
@@ -179,15 +186,15 @@
                             <input type="text" placeholder="刷入條碼或商品編號..." class="flex-1 text-2xl font-black text-slate-800 outline-none bg-transparent w-full" id="mainInput">
                         </div>
                         <div class="flex-1 grid grid-cols-[repeat(3,minmax(0,1fr))_145px] gap-2.5">
-                            <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm px-1 overflow-hidden">
+                            <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm px-1">
                                 <i class="fa-solid fa-building text-slate-500 text-xl mb-1 group-hover:scale-110 transition-transform shrink-0"></i>
                                 <span class="text-[11px] font-black text-slate-600 whitespace-nowrap">統一編號</span>
                             </button>
-                            <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm px-1 overflow-hidden">
+                            <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm px-1">
                                 <i class="fa-solid fa-heart text-rose-500 text-xl mb-1 group-hover:scale-110 transition-transform shrink-0"></i>
                                 <span class="text-[11px] font-black text-slate-600 whitespace-nowrap">愛心捐款</span>
                             </button>
-                            <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm px-1 overflow-hidden">
+                            <button class="bg-white border border-slate-300 rounded-2xl flex flex-col items-center justify-center btn-press group shadow-sm px-1">
                                 <i class="fa-solid fa-mobile-screen text-accent-500 text-xl mb-1 group-hover:scale-110 transition-transform shrink-0"></i>
                                 <span class="text-[11px] font-black text-slate-600 whitespace-nowrap">手機載具</span>
                             </button>
@@ -217,7 +224,7 @@
                             <span class="text-base font-black whitespace-nowrap">禮券抵用</span>
                         </button>
                         <button onclick="backToSubtotal()" class="col-span-4 bg-slate-100 border border-slate-300 rounded-xl font-black text-slate-500 btn-press text-sm flex items-center justify-center hover:bg-slate-200">
-                            <i class="fa-solid fa-arrow-left mr-2 text-xs"></i> 返回修改商品清單 (或按 ESC)
+                            <i class="fa-solid fa-arrow-left mr-2 text-xs"></i> 返回修改商品清單 (ESC)
                         </button>
                     </div>
                 </div>
@@ -244,9 +251,56 @@
 
 <!-- ================= MODALS ================= -->
 
-<!-- 現金結帳視窗 (新增數字按鍵邏輯) -->
-<div id="cashPayModal" class="modal">
+<!-- 1. 飲品客製化設定 (修復版) -->
+<div id="drinkCustomModal" class="modal">
     <div class="bg-white w-[540px] rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
+        <div class="bg-brand-600 text-white px-10 py-6 flex justify-between items-center shrink-0">
+            <h3 class="font-black text-2xl tracking-tighter"><i class="fa-solid fa-wand-magic-sparkles mr-3 text-accent-400"></i>飲品客製化設定</h3>
+            <button onclick="closeModal('drinkCustomModal')" class="w-10 h-10 hover:bg-white/10 rounded-full flex items-center justify-center btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="p-8 flex flex-col gap-6 text-left">
+            <div>
+                <label class="text-[12px] font-black text-slate-400 block mb-3 uppercase tracking-widest leading-none">溫度模式</label>
+                <div class="flex gap-3">
+                    <button class="option-btn flex-1" data-type="temp" data-value="冰" onclick="setOption('temp', '冰')"><i class="fa-solid fa-snowflake mr-2 opacity-50"></i>冰飲</button>
+                    <button class="option-btn flex-1" data-type="temp" data-value="熱" onclick="setOption('temp', '熱')"><i class="fa-solid fa-fire-flame-curved mr-2 opacity-50"></i>熱飲</button>
+                </div>
+            </div>
+            <div id="iceSection">
+                <label class="text-[12px] font-black text-slate-400 block mb-3 uppercase tracking-widest leading-none">冰塊量</label>
+                <div class="grid grid-cols-5 gap-2">
+                    <button class="option-btn" data-type="ice" data-value="正常" onclick="setOption('ice', '正常')">正常</button>
+                    <button class="option-btn" data-type="ice" data-value="少冰" onclick="setOption('ice', '少冰')">少冰</button>
+                    <button class="option-btn" data-type="ice" data-value="微冰" onclick="setOption('ice', '微冰')">微冰</button>
+                    <button class="option-btn" data-type="ice" data-value="去冰" onclick="setOption('ice', '去冰')">去冰</button>
+                    <button class="option-btn" data-type="ice" data-value="完全去冰" onclick="setOption('ice', '完全去冰')">完去</button>
+                </div>
+            </div>
+            <div>
+                <label class="text-[12px] font-black text-slate-400 block mb-3 uppercase tracking-widest leading-none">甜度選擇</label>
+                <div class="grid grid-cols-4 gap-2">
+                    <button class="option-btn" data-type="sugar" data-value="正常" onclick="setOption('sugar', '正常')">正常</button>
+                    <button class="option-btn" data-type="sugar" data-value="少糖" onclick="setOption('sugar', '少糖')">7分</button>
+                    <button class="option-btn" data-type="sugar" data-value="半糖" onclick="setOption('sugar', '半糖')">5分</button>
+                    <button class="option-btn" data-type="sugar" data-value="微糖" onclick="setOption('sugar', '微糖')">3分</button>
+                    <button class="option-btn" data-type="sugar" data-value="無糖" onclick="setOption('sugar', '無糖')">無糖</button>
+                </div>
+            </div>
+            <div>
+                <label class="text-[12px] font-black text-slate-400 block mb-3 uppercase tracking-widest leading-none">特別備註</label>
+                <input type="text" id="customNote" placeholder="例如：加厚、加珍珠、自備杯折扣..." class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-sm font-black outline-none focus:border-accent-500 focus:bg-white transition-all shadow-inner">
+            </div>
+        </div>
+        <div class="px-10 pb-10 flex gap-4">
+            <button onclick="closeModal('drinkCustomModal')" class="flex-1 py-5 bg-slate-100 text-slate-500 font-black rounded-3xl btn-press">放棄返回</button>
+            <button onclick="saveDrinkCustom()" class="flex-[1.5] py-5 bg-accent-600 text-white font-black rounded-3xl shadow-xl btn-press text-xl border-b-4 border-accent-800">完成設定</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 現金結帳視窗 -->
+<div id="cashPayModal" class="modal">
+    <div class="bg-white w-[540px] rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200 text-left">
         <div class="bg-success-600 text-white px-10 py-6 flex justify-between items-center shrink-0">
             <h3 class="font-black text-2xl tracking-tighter">現金支付結帳</h3>
             <button onclick="closeModal('cashPayModal')" class="btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -278,13 +332,13 @@
             </div>
         </div>
         <div class="px-8 pb-8 flex gap-3">
-            <button onclick="closeModal('cashPayModal')" class="flex-1 py-5 bg-slate-100 text-slate-500 font-black rounded-3xl btn-press">返回</button>
+            <button onclick="closeModal('cashPayModal')" class="flex-1 py-5 bg-slate-100 text-slate-500 font-black rounded-3xl btn-press">返回修改</button>
             <button onclick="triggerUniversalSuccess('cashPayModal')" class="flex-[1.5] py-5 bg-success-500 text-white font-black rounded-3xl shadow-xl btn-press text-xl">確認收錢 (ENT)</button>
         </div>
     </div>
 </div>
 
-<!-- 信用卡支付模擬視窗 -->
+<!-- 信用卡、行動支付、成功視窗略... (維持先前修正好的邏輯) -->
 <div id="creditPayModal" class="modal">
     <div class="bg-white w-[460px] rounded-[3rem] shadow-2xl text-center p-10 animate-slideUp">
         <div id="creditProcessing">
@@ -298,15 +352,13 @@
                 </div>
             </div>
             <h3 class="text-2xl font-black text-slate-800 mb-2">信用卡連線中...</h3>
-            <p class="text-sm font-bold text-slate-400 leading-relaxed px-4">請指示顧客於刷卡機感應、插卡或掃碼進行支付</p>
-            <div class="mt-8">
-                <button onclick="closeModal('creditPayModal')" class="px-10 py-3 bg-slate-100 text-slate-500 font-black rounded-xl btn-press text-sm uppercase">Cancel</button>
-            </div>
+            <p class="text-sm font-bold text-slate-400 px-4 leading-relaxed">請指示顧客於刷卡機感應、插卡或掃碼進行支付</p>
+            <div class="mt-8"><button onclick="closeModal('creditPayModal')" class="px-10 py-3 bg-slate-100 text-slate-500 font-black rounded-xl btn-press text-sm uppercase">Cancel</button></div>
         </div>
         <div id="creditError" class="hidden">
             <div class="w-24 h-24 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl shrink-0"><i class="fa-solid fa-circle-exclamation"></i></div>
             <h3 class="text-2xl font-black text-slate-800 mb-2">扣款失敗</h3>
-            <p class="text-sm font-bold text-slate-500 leading-relaxed px-4">主機回應：連線逾時或交易被拒絕。<br>是否嘗試重新發起扣款作業？</p>
+            <p class="text-sm font-bold text-slate-500 px-4 leading-relaxed">主機回應：連線逾時或交易被拒絕。<br>是否嘗試重新發起扣款作業？</p>
             <div class="grid grid-cols-2 gap-3 mt-8">
                 <button onclick="closeModal('creditPayModal')" class="py-4 bg-slate-100 text-slate-500 font-black rounded-xl btn-press">取消交易</button>
                 <button onclick="retryCreditPayment()" class="py-4 bg-blue-500 text-white font-black rounded-xl btn-press shadow-lg border-b-4 border-blue-700">重新扣款</button>
@@ -315,17 +367,11 @@
     </div>
 </div>
 
-<!-- 行動支付視窗 -->
 <div id="mobilePayModal" class="modal">
-    <div class="bg-white w-[460px] rounded-[3rem] shadow-2xl overflow-hidden p-10 animate-slideUp">
+    <div class="bg-white w-[460px] rounded-[3rem] shadow-2xl overflow-hidden p-10 animate-slideUp text-left">
         <div class="flex items-center gap-4 mb-8">
-            <div class="w-14 h-14 bg-brand-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-lg">
-                <i class="fa-solid fa-qrcode"></i>
-            </div>
-            <div>
-                <h3 class="text-xl font-black text-slate-800">行動支付扣款</h3>
-                <p class="text-xs font-black text-slate-400 tracking-widest uppercase leading-none mt-1">Scan QR Code</p>
-            </div>
+            <div class="w-14 h-14 bg-brand-600 text-white rounded-2xl flex items-center justify-center text-3xl shadow-lg"><i class="fa-solid fa-qrcode"></i></div>
+            <div><h3 class="text-xl font-black text-slate-800">行動支付扣款</h3><p class="text-xs font-black text-slate-400 tracking-widest uppercase mt-1 leading-none">Scan QR Code</p></div>
         </div>
         <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100 mb-6 flex justify-between items-center shadow-inner">
             <span class="font-black text-slate-500 text-lg uppercase tracking-widest">應收金額</span>
@@ -339,55 +385,50 @@
     </div>
 </div>
 
-<!-- 禮券清單視窗 -->
 <div id="giftCardListModal" class="modal">
-    <div class="bg-white w-[420px] rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
-        <div class="bg-purple-600 text-white px-8 py-5 flex justify-between items-center shrink-0">
-            <h3 class="font-black text-xl">選擇禮券類型</h3>
-            <button onclick="closeModal('giftCardListModal')" class="btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
-        </div>
+    <div class="bg-white w-[420px] rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200 text-left">
+        <div class="bg-purple-600 text-white px-8 py-5 flex justify-between items-center shrink-0"><h3 class="font-black text-xl">選擇禮券類型</h3><button onclick="closeModal('giftCardListModal')" class="btn-press"><i class="fa-solid fa-xmark text-xl"></i></button></div>
         <div class="p-6 flex flex-col gap-2.5">
             <button onclick="selectGiftCard('百貨專用商品券')" class="w-full p-5 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-purple-300 rounded-2xl font-black text-slate-700 text-left btn-press transition-all flex justify-between items-center">百貨專用商品券 <i class="fa-solid fa-chevron-right text-slate-300"></i></button>
             <button onclick="selectGiftCard('系統預發數位券')" class="w-full p-5 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-purple-300 rounded-2xl font-black text-slate-700 text-left btn-press transition-all flex justify-between items-center">系統預發數位券 <i class="fa-solid fa-chevron-right text-slate-300"></i></button>
-            <button onclick="selectGiftCard('合作銀行酬賓券')" class="w-full p-5 bg-slate-50 hover:bg-white border-2 border-transparent hover:border-purple-300 rounded-2xl font-black text-slate-700 text-left btn-press transition-all flex justify-between items-center">合作銀行酬賓券 <i class="fa-solid fa-chevron-right text-slate-300"></i></button>
         </div>
     </div>
 </div>
 
-<!-- 禮券輸入視窗 -->
 <div id="giftCardInputModal" class="modal">
     <div class="bg-white w-[460px] rounded-[3.5rem] shadow-2xl overflow-hidden p-10 animate-slideUp text-center">
         <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl"><i class="fa-solid fa-ticket"></i></div>
         <h3 class="text-2xl font-black text-slate-800 mb-2" id="selectedGiftTitle">禮券名稱</h3>
         <p class="text-sm font-bold text-slate-400 mb-8 uppercase tracking-widest">請刷入條碼或輸入編號</p>
-        <div class="relative mb-8">
-            <input type="text" id="giftInput" placeholder="等待輸入中..." class="w-full bg-white border-2 border-purple-500 rounded-2xl p-5 text-2xl font-black outline-none shadow-inner text-center">
-        </div>
-        <div class="flex gap-4">
-            <button onclick="closeModal('giftCardInputModal'); openModal('giftCardListModal');" class="flex-1 py-5 bg-slate-100 text-slate-500 font-black rounded-3xl btn-press">回上層</button>
-            <button onclick="triggerUniversalSuccess('giftCardInputModal')" class="flex-[1.5] py-5 bg-purple-600 text-white font-black rounded-3xl btn-press shadow-xl text-lg">確認抵用</button>
-        </div>
+        <input type="text" id="giftInput" placeholder="等待輸入中..." class="w-full bg-white border-2 border-purple-500 rounded-2xl p-5 text-2xl font-black outline-none shadow-inner text-center mb-8">
+        <div class="flex gap-4"><button onclick="closeModal('giftCardInputModal'); openModal('giftCardListModal');" class="flex-1 py-5 bg-slate-100 text-slate-500 font-black rounded-3xl btn-press">返回清單</button><button onclick="triggerUniversalSuccess('giftCardInputModal')" class="flex-[1.5] py-5 bg-purple-600 text-white font-black rounded-3xl btn-press shadow-xl text-lg">確認抵用</button></div>
     </div>
 </div>
 
-<!-- 支付成功 -->
 <div id="successModal" class="modal">
     <div class="bg-white w-[460px] rounded-[4rem] shadow-2xl text-center p-12 animate-slideUp">
         <div class="w-28 h-28 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 text-6xl shadow-inner shrink-0"><i class="fa-solid fa-check"></i></div>
         <h3 class="text-4xl font-black text-slate-800 mb-2 text-success-600 leading-none">付款成功</h3>
         <p class="text-xl font-bold text-slate-500 mb-10">扣款成功，列印發票收據中...</p>
-        <div class="flex items-center justify-center gap-3">
-            <div class="w-3 h-3 bg-slate-200 rounded-full animate-bounce"></div>
-            <div class="w-3 h-3 bg-slate-200 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-            <div class="w-3 h-3 bg-slate-200 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-        </div>
+        <div class="flex gap-3 justify-center"><div class="w-3 h-3 bg-slate-200 rounded-full animate-bounce"></div><div class="w-3 h-3 bg-slate-200 rounded-full animate-bounce" style="animation-delay: 0.1s"></div><div class="w-3 h-3 bg-slate-200 rounded-full animate-bounce" style="animation-delay: 0.2s"></div></div>
     </div>
 </div>
 
-<!-- 飲品客製、會員視窗 -->
-<div id="drinkCustomModal" class="modal">... (保持原有結構)</div>
-<div id="memberModal" class="modal">... (保持原有結構)</div>
-<div id="msgModal" class="modal">... (保持原有結構)</div>
+<div id="memberModal" class="modal">
+    <div class="bg-white w-[420px] rounded-[2.5rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200 text-left">
+        <div class="bg-accent-600 text-white px-8 py-5 flex justify-between items-center shrink-0"><h3 class="font-black text-xl tracking-tighter">會員查詢</h3><button onclick="closeModal('memberModal')" class="btn-press"><i class="fa-solid fa-xmark text-xl"></i></button></div>
+        <div class="p-8 text-center"><p class="text-xs font-black text-slate-400 mb-6 uppercase tracking-widest leading-none">請輸入會員電話號碼</p><input type="text" placeholder="09XX-XXX-XXX" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-5 text-3xl font-black outline-none text-center shadow-inner"></div>
+        <div class="px-8 pb-8 flex gap-3"><button onclick="closeModal('memberModal')" class="flex-1 py-4 bg-slate-100 text-slate-500 font-black rounded-2xl btn-press">返回</button><button onclick="closeModal('memberModal')" class="flex-1 py-4 bg-accent-600 text-white font-black rounded-2xl shadow-lg btn-press">確認查詢</button></div>
+    </div>
+</div>
+
+<div id="msgModal" class="modal">
+    <div class="bg-white w-[600px] rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200 text-left">
+        <div class="bg-brand-600 text-white px-8 py-6 flex justify-between items-center"><h3 class="font-black text-2xl tracking-tighter">系統訊息中心</h3><button onclick="closeModal('msgModal')" class="btn-press"><i class="fa-solid fa-xmark text-xl"></i></button></div>
+        <div class="p-8 max-h-[450px] overflow-y-auto custom-scroll flex flex-col gap-5"><div class="p-5 bg-blue-50 border-l-8 border-accent-500 rounded-2xl shadow-sm"><p class="font-black text-slate-800 text-lg">【促銷】購物滿 500 元送 50 元折價券</p><p class="text-sm text-slate-600 mt-2">適用至 2023/11/30。本活動可與會員折扣併用。</p></div><div class="p-5 bg-red-50 border-l-8 border-danger-500 rounded-2xl shadow-sm"><p class="font-black text-slate-800 text-lg">今日 24:00 將進行電子發票備份作業</p><p class="text-sm text-slate-600 mt-2">作業時間約 15 分鐘，屆時系統將自動進入離線模式。</p></div></div>
+        <div class="p-8 text-center bg-slate-100 border-t border-slate-200"><button onclick="closeModal('msgModal')" class="px-16 py-4 bg-brand-600 text-white rounded-2xl font-black btn-press shadow-xl text-lg">關閉視窗</button></div>
+    </div>
+</div>
 
 <script>
     // --- 核心數據 ---
@@ -405,7 +446,9 @@
         { id: 5, name: '嚴選椪柑箱購 (10入)', price: 450, type: 'food', icon: 'fa-box', color: 'amber' },
         { id: 6, name: '和風照燒雞腿三明治', price: 165, type: 'food', icon: 'fa-sandwich', color: 'yellow' },
         { id: 7, name: '日式紅豆蛋糕捲', price: 220, type: 'food', icon: 'fa-cake-slice', color: 'rose' },
-        { id: 8, name: '全麥舒食沙拉盆', price: 180, type: 'food', icon: 'fa-carrot', color: 'emerald' }
+        { id: 8, name: '全麥舒食沙拉盆', price: 180, type: 'food', icon: 'fa-carrot', color: 'emerald' },
+        { id: 9, name: '能量核桃果乾包', price: 65, type: 'food', icon: 'fa-apple-whole', color: 'red' },
+        { id: 10, name: '精裝手沖咖啡組', price: 1200, type: 'item', icon: 'fa-gift', color: 'purple' }
     ];
 
     function renderProductGrid(filter = 'all') {
@@ -430,6 +473,7 @@
         }
     }
 
+    // --- 購物車功能 (恢復互動式) ---
     function addToCart(name, price, custom) {
         cart.push({ id: Date.now(), name, price, qty: 1, isDeleted: false, custom });
         renderCart();
@@ -438,15 +482,41 @@
     function renderCart() {
         const listEl = document.getElementById('cartList');
         listEl.innerHTML = '';
-        let total = 0;
+        let total = 0, count = 0;
         cart.forEach((item, index) => {
             const isActive = selectedIndex === index;
             const subtotal = item.price * item.qty;
-            if (!item.isDeleted) total += subtotal;
+            if (!item.isDeleted) { total += subtotal; count += item.qty; }
+
             const li = document.createElement('li');
             li.className = `flex flex-col border-b border-slate-100 transition-all cursor-pointer ${isActive ? 'active-item-row' : ''}`;
             let customText = item.custom ? `<p class="text-[10px] font-black ${isActive ? 'text-brand-900' : 'text-slate-400'} mt-1 whitespace-nowrap overflow-hidden leading-none"><i class="fa-solid fa-wand-magic-sparkles mr-1 text-accent-500 text-[8px]"></i>${item.custom.temp} / ${item.custom.sugar} / ${item.custom.temp === '冰' ? item.custom.ice : '不適用'}${item.custom.note ? ' / ' + item.custom.note : ''}</p>` : '';
-            li.innerHTML = `<div class="flex items-center px-4 py-4 ${isActive ? 'active-item' : ''}" onclick="selectCartItem(${index})"><div class="w-8 text-center text-xs font-black ${isActive ? 'text-brand-900' : 'text-slate-300'}">${index+1}</div><div class="flex-1 px-2 min-w-0"><h4 class="text-sm font-black transition-all leading-tight ${item.isDeleted ? 'line-through text-danger-500 opacity-50' : (isActive ? 'text-brand-900' : 'text-slate-800')}">${item.name}</h4>${customText}</div><div class="w-10 text-center text-lg font-black leading-none">${item.qty}</div><div class="w-20 text-right text-lg font-black leading-none">$ ${subtotal}</div></div><div class="expand-panel ${isActive ? 'active-item' : ''} bg-white/40 shadow-inner"><div class="flex items-center gap-2 p-4 h-full"><div class="flex bg-white rounded-xl border-2 border-slate-300 overflow-hidden shrink-0 h-12"><button onclick="updateQty(${index}, -1, event)" class="w-12 h-full flex items-center justify-center hover:bg-slate-100 btn-press"><i class="fa-solid fa-minus text-slate-600 text-xs"></i></button><div class="w-14 h-full flex items-center justify-center font-black text-xl text-slate-800 border-x-2 border-slate-200 leading-none">${item.qty}</div><button onclick="updateQty(${index}, 1, event)" class="w-12 h-full flex items-center justify-center hover:bg-slate-100 btn-press"><i class="fa-solid fa-plus text-slate-600 text-xs"></i></button></div>${item.custom ? `<button onclick="reEditDrink(${index}, event)" class="px-5 h-12 bg-accent-600 text-white rounded-xl text-xs font-black hover:bg-accent-700 btn-press shadow-md whitespace-nowrap">客製修改</button>` : ''}<button class="px-5 h-12 bg-amber-500 text-white rounded-xl text-xs font-black hover:bg-amber-600 btn-press shadow-md whitespace-nowrap">折扣</button><div class="flex-1"></div><button onclick="toggleDelete(${index}, event)" class="px-5 h-12 ${item.isDeleted ? 'bg-slate-500' : 'bg-danger-500'} text-white rounded-xl text-xs font-black shadow-lg btn-press whitespace-nowrap">更正刪除</button></div></div>`;
+            
+            li.innerHTML = `
+                <div class="flex items-center px-4 py-4 ${isActive ? 'active-item' : ''}" onclick="selectCartItem(${index})">
+                    <div class="w-8 text-center text-xs font-black ${isActive ? 'text-brand-900' : 'text-slate-300'}">${index+1}</div>
+                    <div class="flex-1 px-2 min-w-0">
+                        <h4 class="text-sm font-black transition-all leading-tight ${item.isDeleted ? 'line-through text-danger-500 opacity-50' : (isActive ? 'text-brand-900' : 'text-slate-800')}">${item.name}</h4>
+                        ${customText}
+                    </div>
+                    <div class="w-10 text-center text-lg font-black leading-none">${item.qty}</div>
+                    <div class="w-20 text-right text-lg font-black leading-none">$ ${subtotal}</div>
+                </div>
+                <div class="expand-panel ${isActive ? 'active-item' : ''} bg-white/40 shadow-inner">
+                    <div class="flex items-center gap-2 p-4 h-full">
+                        <div class="flex bg-white rounded-xl border-2 border-slate-300 overflow-hidden shrink-0 h-12">
+                            <button onclick="updateQty(${index}, -1, event)" class="w-12 h-full flex items-center justify-center hover:bg-slate-100 btn-press"><i class="fa-solid fa-minus text-slate-600 text-xs"></i></button>
+                            <div class="w-14 h-full flex items-center justify-center font-black text-xl text-slate-800 border-x-2 border-slate-200 leading-none">${item.qty}</div>
+                            <button onclick="updateQty(${index}, 1, event)" class="w-12 h-full flex items-center justify-center hover:bg-slate-100 btn-press"><i class="fa-solid fa-plus text-slate-600 text-xs"></i></button>
+                        </div>
+                        ${item.custom ? `<button onclick="reEditDrink(${index}, event)" class="px-5 h-12 bg-accent-600 text-white rounded-xl text-xs font-black hover:bg-accent-700 btn-press shadow-md whitespace-nowrap">客製修改</button>` : ''}
+                        <button class="px-5 h-12 bg-amber-500 text-white rounded-xl text-xs font-black hover:bg-amber-600 btn-press shadow-md whitespace-nowrap">折扣</button>
+                        <div class="flex-1"></div>
+                        <button onclick="toggleDelete(${index}, event)" class="px-5 h-12 ${item.isDeleted ? 'bg-slate-500' : 'bg-danger-500'} text-white rounded-xl text-xs font-black shadow-lg btn-press whitespace-nowrap uppercase tracking-wider">
+                            ${item.isDeleted ? '恢復項目' : '更正刪除'}
+                        </button>
+                    </div>
+                </div>`;
             listEl.appendChild(li);
         });
         totalAmount = total;
@@ -458,7 +528,33 @@
     function updateQty(idx, delta, e) { e.stopPropagation(); if(!cart[idx].isDeleted) { cart[idx].qty = Math.max(1, cart[idx].qty + delta); renderCart(); } }
     function toggleDelete(idx, e) { e.stopPropagation(); cart[idx].isDeleted = !cart[idx].isDeleted; renderCart(); }
 
-    // --- 支付邏輯 ---
+    // --- 客製化邏輯 (修復版) ---
+    function openDrinkCustomModal() {
+        updateOptionUI('temp', currentDrinkConfig.temp);
+        updateOptionUI('ice', currentDrinkConfig.ice);
+        updateOptionUI('sugar', currentDrinkConfig.sugar);
+        document.getElementById('customNote').value = currentDrinkConfig.note;
+        document.getElementById('iceSection').style.display = currentDrinkConfig.temp === '熱' ? 'none' : 'block';
+        openModal('drinkCustomModal');
+    }
+    function setOption(type, val) {
+        currentDrinkConfig[type] = val;
+        updateOptionUI(type, val);
+        if(type === 'temp') document.getElementById('iceSection').style.display = val === '熱' ? 'none' : 'block';
+    }
+    function updateOptionUI(type, val) {
+        document.querySelectorAll(`.option-btn[data-type="${type}"]`).forEach(b => { b.classList.toggle('active', b.getAttribute('data-value') === val); });
+    }
+    function saveDrinkCustom() {
+        currentDrinkConfig.note = document.getElementById('customNote').value;
+        const data = { ...currentDrinkConfig };
+        if(data.editIndex === -1) { addToCart(data.productName, data.price, data); }
+        else { cart[data.editIndex].custom = data; renderCart(); }
+        closeModal('drinkCustomModal');
+    }
+    function reEditDrink(idx, e) { e.stopPropagation(); const item = cart[idx]; currentDrinkConfig = { ...item.custom, editIndex: idx }; openDrinkCustomModal(); }
+
+    // --- 支付流程與視窗 (修復版連結) ---
     function switchToPayment() { if(totalAmount <= 0) return; document.getElementById('subtotalPanel').classList.add('hidden'); document.getElementById('paymentPanel').classList.remove('hidden'); }
     function backToSubtotal() { document.getElementById('paymentPanel').classList.add('hidden'); document.getElementById('subtotalPanel').classList.remove('hidden'); }
 
@@ -469,8 +565,7 @@
         document.getElementById('creditProcessing').classList.remove('hidden');
         document.getElementById('creditError').classList.add('hidden');
         openModal('creditPayModal');
-        let sec = 60;
-        document.getElementById('countdownText').textContent = sec + '秒';
+        let sec = 60; document.getElementById('countdownText').textContent = sec + '秒';
         if(creditTimer) clearInterval(creditTimer);
         creditTimer = setInterval(() => {
             sec--; document.getElementById('countdownText').textContent = sec + '秒';
@@ -487,13 +582,8 @@
     function openGiftCardListModal() { openModal('giftCardListModal'); }
     function selectGiftCard(name) { closeModal('giftCardListModal'); document.getElementById('selectedGiftTitle').textContent = name; openModal('giftCardInputModal'); setTimeout(()=>document.getElementById('giftInput').focus(), 300); }
 
-    function triggerUniversalSuccess(fromId = '') {
-        if(fromId) closeModal(fromId);
-        openModal('successModal');
-        setTimeout(() => location.reload(), 5000);
-    }
+    function triggerUniversalSuccess(fromId = '') { if(fromId) closeModal(fromId); openModal('successModal'); setTimeout(() => location.reload(), 5000); }
 
-    // --- 其他 UI 功能 ---
     function openModal(id) { document.getElementById(id).classList.add('active'); if(id === 'msgModal') document.getElementById('unreadBadge').style.display = 'none'; }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); document.getElementById('mainInput').focus(); if(id === 'creditPayModal') clearInterval(creditTimer); }
     function appendInput(v) { document.getElementById('mainInput').value += v; }
@@ -504,6 +594,7 @@
         renderProductGrid();
         addToCart('招牌特濃冰滴咖啡', 120, { temp: '冰', ice: '少冰', sugar: '半糖', note: '自備杯' });
         addToCart('厚乳拿鐵 (大)', 105, { temp: '冰', ice: '正常', sugar: '無糖', note: '' });
+        addToCart('嚴選椪柑箱購 (10入)', 450, null);
         renderCart();
         document.getElementById('mainInput').focus();
     };
