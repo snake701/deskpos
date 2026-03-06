@@ -236,16 +236,12 @@
             <h3 class="font-black text-xl tracking-tighter"><i class="fa-solid fa-user-tag mr-3"></i>會員查詢與綁定</h3>
             <button onclick="closeModal('memberModal')" class="w-10 h-10 hover:bg-white/10 rounded-full flex items-center justify-center btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
-        <div class="p-8 flex flex-col gap-6">
-            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">請刷讀會員條碼或輸入手機</p>
+        <div class="p-8 flex flex-col gap-6 text-center">
+            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">請輸入會員手機號碼</p>
             <input type="text" placeholder="手機號碼 / 會員卡號" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-2xl font-black outline-none focus:border-accent-500 text-center shadow-inner">
-            <div class="grid grid-cols-2 gap-3">
-                <button class="py-3 bg-slate-100 rounded-xl font-black text-slate-600 hover:bg-slate-200">條碼掃描</button>
-                <button class="py-3 bg-slate-100 rounded-xl font-black text-slate-600 hover:bg-slate-200">實體卡</button>
-            </div>
         </div>
         <div class="px-8 pb-8 flex gap-3">
-            <button onclick="closeModal('memberModal')" class="flex-1 py-4 bg-slate-200 text-slate-500 font-black rounded-2xl btn-press">取消</button>
+            <button onclick="closeModal('memberModal')" class="flex-1 py-4 bg-slate-200 text-slate-500 font-black rounded-2xl btn-press">取消返回</button>
             <button onclick="closeModal('memberModal')" class="flex-1 py-4 bg-accent-600 text-white font-black rounded-2xl shadow-lg btn-press">查詢會員</button>
         </div>
     </div>
@@ -301,19 +297,29 @@
 
 <!-- 訊息公告 Modal -->
 <div id="msgModal" class="modal">
-    <div class="bg-white w-[600px] rounded-3xl shadow-2xl overflow-hidden animate-slideUp">
+    <div class="bg-white w-[600px] rounded-3xl shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
         <div class="bg-brand-600 text-white px-6 py-4 flex justify-between items-center">
-            <h3 class="font-black text-xl"><i class="fa-solid fa-bell mr-3"></i>訊息中心</h3>
-            <button onclick="closeModal('msgModal')" class="btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="font-black text-xl"><i class="fa-solid fa-bell mr-3"></i>系統訊息中心</h3>
+            <button onclick="closeModal('msgModal')" class="w-10 h-10 hover:bg-white/10 rounded-full flex items-center justify-center btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         <div class="p-6 max-h-[450px] overflow-y-auto custom-scroll flex flex-col gap-4">
-            <div class="p-4 bg-slate-50 border-l-4 border-accent-500 rounded-lg">
-                <p class="font-black text-slate-800">【促銷】全店購買咖啡加購甜點現折 20 元</p>
-                <p class="text-xs text-slate-500 mt-2">適用期間：即日起至 2023/11/30</p>
+            <div class="p-5 bg-slate-50 border-l-4 border-accent-500 rounded-xl shadow-sm">
+                <p class="font-black text-slate-800 text-lg">【促銷】全店購買咖啡加購甜點現折 20 元</p>
+                <p class="text-xs text-slate-500 mt-2 font-bold uppercase tracking-widest">有效期限：即日起至 2023/11/30</p>
+                <div class="mt-4 text-sm text-slate-600 leading-relaxed font-medium">
+                    請各店人員於結帳時主動詢問顧客，本活動可與會員折扣併用。
+                </div>
+            </div>
+            <div class="p-5 bg-slate-50 border-l-4 border-danger-500 rounded-xl shadow-sm">
+                <p class="font-black text-slate-800 text-lg">【維護】今日 24:00 進行發票系統備份</p>
+                <p class="text-xs text-slate-500 mt-2 font-bold uppercase tracking-widest">發佈時間：2023/10/25 10:00</p>
+                <div class="mt-4 text-sm text-slate-600 leading-relaxed font-medium">
+                    備份期間不影響離線開立發票，請於次日重啟系統進行自動上傳。
+                </div>
             </div>
         </div>
-        <div class="p-4 text-center bg-slate-50">
-            <button onclick="closeModal('msgModal')" class="px-8 py-2 bg-brand-600 text-white rounded-lg font-bold">關閉視窗</button>
+        <div class="p-6 text-center bg-slate-100 border-t border-slate-200">
+            <button onclick="closeModal('msgModal')" class="px-12 py-3 bg-brand-600 text-white rounded-xl font-black btn-press shadow-md">關閉訊息視窗</button>
         </div>
     </div>
 </div>
@@ -436,16 +442,16 @@
                 </div>
                 
                 <div class="expand-panel bg-white/40 shadow-inner">
-                    <div class="flex items-center gap-2 p-3 h-full">
-                        <div class="flex bg-white rounded-xl border border-slate-300 overflow-hidden shadow-sm">
-                            <button onclick="updateQty(${index}, -1, event)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-minus text-xs"></i></button>
-                            <div class="w-12 h-10 flex items-center justify-center font-black text-sm text-slate-800 border-x border-slate-200">${item.qty}</div>
-                            <button onclick="updateQty(${index}, 1, event)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-plus text-xs"></i></button>
+                    <div class="flex items-center gap-1.5 p-3 h-full">
+                        <div class="flex bg-white rounded-lg border border-slate-300 overflow-hidden shadow-sm shrink-0">
+                            <button onclick="updateQty(${index}, -1, event)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <div class="w-10 h-8 flex items-center justify-center font-black text-sm text-slate-800 border-x border-slate-200">${item.qty}</div>
+                            <button onclick="updateQty(${index}, 1, event)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
-                        ${item.custom ? `<button onclick="openDrinkModal(${index})" class="px-5 h-10 bg-white border border-slate-300 rounded-xl text-[11px] font-black text-slate-700 hover:bg-blue-50 btn-press shadow-sm">客製修改</button>` : ''}
-                        <button class="px-5 h-10 bg-white border border-slate-300 rounded-xl text-[11px] font-black text-slate-700 hover:bg-amber-50 btn-press shadow-sm">折扣</button>
+                        ${item.custom ? `<button onclick="openDrinkModal(${index})" class="px-3 h-8 bg-white border border-slate-300 rounded-lg text-[10px] font-black text-slate-700 hover:bg-blue-50 btn-press shadow-sm whitespace-nowrap">客製修改</button>` : ''}
+                        <button class="px-3 h-8 bg-white border border-slate-300 rounded-lg text-[10px] font-black text-slate-700 hover:bg-amber-50 btn-press shadow-sm whitespace-nowrap">折扣</button>
                         <div class="flex-1"></div>
-                        <button onclick="toggleDelete(${index}, event)" class="px-5 h-10 ${item.isDeleted ? 'bg-slate-500' : 'bg-danger-500'} text-white rounded-xl text-[11px] font-black shadow-md btn-press uppercase tracking-widest">
+                        <button onclick="toggleDelete(${index}, event)" class="px-3 h-8 ${item.isDeleted ? 'bg-slate-500' : 'bg-danger-500'} text-white rounded-lg text-[10px] font-black shadow-md btn-press whitespace-nowrap">
                             ${item.isDeleted ? '恢復項目' : '更正項目'}
                         </button>
                     </div>
@@ -477,4 +483,3 @@
 
 </body>
 </html>
-
