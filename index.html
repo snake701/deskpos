@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextGen POS Pro v3.8 - 全中文互動強化版</title>
+    <title>NextGen POS Pro v3.9 - 訊息通知優化版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -40,7 +40,7 @@
         .expand-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .active-item .expand-panel { max-height: 80px; }
         
-        /* 跑馬燈動畫 - 速度減慢至 40s */
+        /* 跑馬燈動畫 - 速度慢速 40s */
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 40s linear infinite; }
         .marquee-content:hover { animation-play-state: paused; }
@@ -66,6 +66,17 @@
 
         /* 列表中被選中的品項顏色 */
         .active-item-row { background-color: #fbbf24 !important; }
+        
+        /* 手機 APP 風格的通知氣泡 */
+        .msg-badge { 
+            position: absolute; top: -4px; right: -4px; 
+            background-color: #ef4444; color: white; 
+            font-size: 10px; font-weight: 900; 
+            min-width: 18px; height: 18px; 
+            padding: 0 4px; border-radius: 99px; 
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #0f172a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -74,7 +85,7 @@
     <!-- ================= TOP HEADER ================= -->
     <header class="h-14 bg-brand-600 text-white flex items-center justify-between px-4 shrink-0 shadow-md">
         <div class="flex items-center gap-4">
-            <h1 class="text-xl font-black tracking-tighter">KS-收銀系統 <span class="text-accent-500">PRO</span></h1>
+            <h1 class="text-xl font-black tracking-tighter text-white">KS-收銀系統 <span class="text-accent-500">PRO</span></h1>
             <div class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-[11px] font-bold tracking-widest text-slate-300">中山旗艦店 - 01機</div>
         </div>
 
@@ -92,7 +103,7 @@
             <!-- 連線狀態 -->
             <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
                 <div class="w-2 h-2 bg-success-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                <span class="text-[10px] font-black text-slate-300">連線正常</span>
+                <span class="text-[10px] font-black text-slate-300">系統連線正常</span>
             </div>
             
             <div class="text-right leading-none">
@@ -124,7 +135,7 @@
             <div class="bg-brand-700 text-white p-5 shrink-0 shadow-2xl">
                 <div class="flex justify-between items-center text-xs text-slate-400 font-bold mb-1">
                     <span id="itemCount">品項總計: 0 項</span>
-                    <span>內含稅額 (5%)</span>
+                    <span class="text-slate-500">內含稅額 (5%)</span>
                 </div>
                 <div class="border-t border-slate-500/30 my-3"></div>
                 <div class="flex justify-between items-end">
@@ -215,15 +226,26 @@
         </section>
     </main>
 
-    <!-- ================= FOOTER ================= -->
+    <!-- ================= FOOTER (跑馬燈優化：訊息中心移至最左) ================= -->
     <footer onclick="openModal('msgModal')" class="h-8 bg-brand-600 text-white flex items-center overflow-hidden cursor-pointer hover:bg-brand-700 transition-colors">
-        <div class="bg-danger-500 px-3 h-full flex items-center font-black text-[10px] z-10 shadow-lg tracking-widest">緊急公告</div>
+        <!-- 左側訊息中心標籤 -->
+        <div class="bg-danger-500 px-4 h-full flex items-center font-black text-[11px] z-20 shadow-[4px_0_10px_rgba(0,0,0,0.2)] relative">
+            <i class="fa-solid fa-bell mr-2"></i>訊息中心
+            <!-- 未讀通知氣泡 -->
+            <div id="unreadBadge" class="msg-badge">3</div>
+        </div>
+        
+        <!-- 跑馬燈內容 -->
         <div class="flex-1 relative overflow-hidden h-full flex items-center bg-slate-800">
             <div class="marquee-content font-bold text-[11px] text-slate-100">
-                ⚠️ 注意：今日起會員系統進行例行維修，部分積分可能延遲入帳。 ● 促銷活動：全店購買咖啡加購甜點現折 20 元。 ● 提醒：請記得詢問客戶是否需要發票載具。 ● 系統通知：本日 24:00 進行電子發票備份。
+                🔔 系統通知：今日起會員系統進行例行維修，部分積分可能延遲入帳。 ● 促銷活動：全店購買咖啡加購甜點現折 20 元。 ● 提醒：請記得詢問客戶是否需要發票載具。 ● 營運公告：本日 24:00 進行電子發票伺服器備份維護。
             </div>
         </div>
-        <div class="px-3 text-[10px] font-black text-slate-400 bg-brand-600 h-full flex items-center border-l border-slate-700">訊息中心 <i class="fa-solid fa-circle-info ml-1 text-accent-400"></i></div>
+        
+        <!-- 右側輔助資訊 -->
+        <div class="px-3 text-[10px] font-black text-slate-400 bg-brand-600 h-full flex items-center border-l border-slate-700">
+            點擊查看詳情 <i class="fa-solid fa-chevron-right ml-1 text-accent-400"></i>
+        </div>
     </footer>
 </div>
 
@@ -295,31 +317,39 @@
     </div>
 </div>
 
-<!-- 訊息公告 Modal -->
+<!-- 訊息中心 Modal (點擊跑馬燈開啟) -->
 <div id="msgModal" class="modal">
-    <div class="bg-white w-[600px] rounded-3xl shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
-        <div class="bg-brand-600 text-white px-6 py-4 flex justify-between items-center">
-            <h3 class="font-black text-xl"><i class="fa-solid fa-bell mr-3"></i>系統訊息中心</h3>
-            <button onclick="closeModal('msgModal')" class="w-10 h-10 hover:bg-white/10 rounded-full flex items-center justify-center btn-press"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <div class="bg-white w-[600px] rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
+        <div class="bg-brand-600 text-white px-8 py-6 flex justify-between items-center">
+            <h3 class="font-black text-2xl tracking-tighter"><i class="fa-solid fa-envelope-open-text mr-3 text-accent-400"></i>訊息中心中心</h3>
+            <button onclick="closeModal('msgModal')" class="w-12 h-12 hover:bg-white/10 rounded-full flex items-center justify-center btn-press"><i class="fa-solid fa-xmark text-2xl"></i></button>
         </div>
-        <div class="p-6 max-h-[450px] overflow-y-auto custom-scroll flex flex-col gap-4">
-            <div class="p-5 bg-slate-50 border-l-4 border-accent-500 rounded-xl shadow-sm">
+        <div class="p-8 max-h-[450px] overflow-y-auto custom-scroll flex flex-col gap-5">
+            <div class="p-5 bg-blue-50 border-l-8 border-accent-500 rounded-2xl shadow-sm">
+                <div class="flex justify-between mb-2">
+                    <span class="text-xs font-black text-accent-600 uppercase tracking-widest">系統公告 10:00</span>
+                    <span class="px-2 py-0.5 bg-accent-500 text-white text-[10px] rounded-full font-black">NEW</span>
+                </div>
                 <p class="font-black text-slate-800 text-lg">【促銷】全店購買咖啡加購甜點現折 20 元</p>
-                <p class="text-xs text-slate-500 mt-2 font-bold uppercase tracking-widest">有效期限：即日起至 2023/11/30</p>
-                <div class="mt-4 text-sm text-slate-600 leading-relaxed font-medium">
-                    請各店人員於結帳時主動詢問顧客，本活動可與會員折扣併用。
-                </div>
+                <p class="text-sm text-slate-600 mt-2 font-medium">請各店人員於結帳時主動詢問顧客，本活動可與會員折扣併用。有效期限至 2023/11/30。</p>
             </div>
-            <div class="p-5 bg-slate-50 border-l-4 border-danger-500 rounded-xl shadow-sm">
-                <p class="font-black text-slate-800 text-lg">【維護】今日 24:00 進行發票系統備份</p>
-                <p class="text-xs text-slate-500 mt-2 font-bold uppercase tracking-widest">發佈時間：2023/10/25 10:00</p>
-                <div class="mt-4 text-sm text-slate-600 leading-relaxed font-medium">
-                    備份期間不影響離線開立發票，請於次日重啟系統進行自動上傳。
+            <div class="p-5 bg-red-50 border-l-8 border-danger-500 rounded-2xl shadow-sm opacity-80">
+                <div class="flex justify-between mb-2">
+                    <span class="text-xs font-black text-danger-500 uppercase tracking-widest">緊急通知 09:30</span>
                 </div>
+                <p class="font-black text-slate-800 text-lg">今日 24:00 進行伺服器備份維護</p>
+                <p class="text-sm text-slate-600 mt-2 font-medium">備份期間約 15 分鐘，屆時電子發票功能將自動切換為離線模式。</p>
+            </div>
+            <div class="p-5 bg-slate-50 border-l-8 border-slate-400 rounded-2xl shadow-sm opacity-60">
+                <div class="flex justify-between mb-2">
+                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest">店鋪訊息 昨日</span>
+                </div>
+                <p class="font-black text-slate-800 text-lg">十月份員工表揚大會公告</p>
+                <p class="text-sm text-slate-600 mt-2 font-medium">請各區域負責人彙整上個月表現優異名單，於週五前提交至總部。</p>
             </div>
         </div>
-        <div class="p-6 text-center bg-slate-100 border-t border-slate-200">
-            <button onclick="closeModal('msgModal')" class="px-12 py-3 bg-brand-600 text-white rounded-xl font-black btn-press shadow-md">關閉訊息視窗</button>
+        <div class="p-8 text-center bg-slate-100 border-t border-slate-200">
+            <button onclick="closeModal('msgModal')" class="px-16 py-4 bg-brand-600 text-white rounded-2xl font-black btn-press shadow-xl text-lg border-b-4 border-brand-800">我知道了</button>
         </div>
     </div>
 </div>
@@ -328,6 +358,7 @@
     let cart = [];
     let selectedIndex = -1;
     let currentDrinkConfig = { temp: '冰', ice: '正常', sugar: '正常', note: '', productName: '', price: 0, editIndex: -1 };
+    let unreadCount = 3;
 
     function checkCustomization(name, price, isDrink) {
         if (isDrink) {
@@ -442,16 +473,16 @@
                 </div>
                 
                 <div class="expand-panel bg-white/40 shadow-inner">
-                    <div class="flex items-center gap-1.5 p-3 h-full">
+                    <div class="flex items-center gap-2 p-3 h-full">
                         <div class="flex bg-white rounded-lg border border-slate-300 overflow-hidden shadow-sm shrink-0">
-                            <button onclick="updateQty(${index}, -1, event)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-minus text-xs"></i></button>
-                            <div class="w-10 h-8 flex items-center justify-center font-black text-sm text-slate-800 border-x border-slate-200">${item.qty}</div>
-                            <button onclick="updateQty(${index}, 1, event)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-plus text-xs"></i></button>
+                            <button onclick="updateQty(${index}, -1, event)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <div class="w-12 h-10 flex items-center justify-center font-black text-sm text-slate-800 border-x border-slate-200">${item.qty}</div>
+                            <button onclick="updateQty(${index}, 1, event)" class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 btn-press text-slate-600"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
-                        ${item.custom ? `<button onclick="openDrinkModal(${index})" class="px-3 h-8 bg-white border border-slate-300 rounded-lg text-[10px] font-black text-slate-700 hover:bg-blue-50 btn-press shadow-sm whitespace-nowrap">客製修改</button>` : ''}
-                        <button class="px-3 h-8 bg-white border border-slate-300 rounded-lg text-[10px] font-black text-slate-700 hover:bg-amber-50 btn-press shadow-sm whitespace-nowrap">折扣</button>
+                        ${item.custom ? `<button onclick="openDrinkModal(${index})" class="px-5 h-10 bg-accent-600 text-white border border-accent-700 rounded-xl text-xs font-black hover:bg-accent-700 btn-press shadow-sm whitespace-nowrap">客製修改</button>` : ''}
+                        <button class="px-5 h-10 bg-amber-500 text-white border border-amber-600 rounded-xl text-xs font-black hover:bg-amber-600 btn-press shadow-sm whitespace-nowrap">折扣</button>
                         <div class="flex-1"></div>
-                        <button onclick="toggleDelete(${index}, event)" class="px-3 h-8 ${item.isDeleted ? 'bg-slate-500' : 'bg-danger-500'} text-white rounded-lg text-[10px] font-black shadow-md btn-press whitespace-nowrap">
+                        <button onclick="toggleDelete(${index}, event)" class="px-5 h-10 ${item.isDeleted ? 'bg-slate-500 border-slate-600' : 'bg-danger-500 border-danger-600'} text-white border rounded-xl text-xs font-black shadow-md btn-press whitespace-nowrap">
                             ${item.isDeleted ? '恢復項目' : '更正項目'}
                         </button>
                     </div>
@@ -471,7 +502,14 @@
     }
     setInterval(updateClock, 1000); updateClock();
 
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function openModal(id) { 
+        document.getElementById(id).classList.add('active'); 
+        // 點擊跑馬燈開啟訊息中心時，隱藏通知標籤
+        if (id === 'msgModal') {
+            unreadCount = 0;
+            document.getElementById('unreadBadge').style.display = 'none';
+        }
+    }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); document.getElementById('mainInput').focus(); }
 
     window.onload = () => {
