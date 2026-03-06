@@ -77,6 +77,19 @@
             display: flex; align-items: center; justify-content: center;
             border: 2px solid #0f172a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+
+        /* 斷線斜線特效 */
+        .wifi-slash::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140%;
+            height: 2px;
+            background-color: #ef4444;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
@@ -100,10 +113,15 @@
         </div>
 
         <div class="flex items-center gap-6">
-            <!-- 連線狀態 -->
-            <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
-                <div class="w-2 h-2 bg-success-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                <span class="text-[10px] font-black text-slate-300">系統連線正常</span>
+            <!-- 連線狀態圖示化 (點擊可切換測試) -->
+            <div id="connStatus" onclick="toggleConnection()" class="flex items-center gap-3 bg-slate-800/50 px-4 py-1.5 rounded-lg border border-slate-700/50 cursor-pointer hover:bg-slate-700 transition-all">
+                <div class="relative w-6 h-6 flex items-center justify-center">
+                    <!-- 連線中圖示 -->
+                    <i id="wifiIcon" class="fa-solid fa-wifi text-success-500 text-lg transition-all duration-300 animate-pulse"></i>
+                    <!-- 斷線斜線 (預設隱藏) -->
+                    <div id="wifiSlash" class="hidden absolute inset-0 wifi-slash"></div>
+                </div>
+                <span id="connLabel" class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Online</span>
             </div>
             
             <div class="text-right leading-none">
@@ -321,7 +339,7 @@
 <div id="msgModal" class="modal">
     <div class="bg-white w-[600px] rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp border border-slate-200">
         <div class="bg-brand-600 text-white px-8 py-6 flex justify-between items-center">
-            <h3 class="font-black text-2xl tracking-tighter"><i class="fa-solid fa-envelope-open-text mr-3 text-accent-400"></i>訊息中心中心</h3>
+            <h3 class="font-black text-2xl tracking-tighter"><i class="fa-solid fa-envelope-open-text mr-3 text-accent-400"></i>系統訊息中心</h3>
             <button onclick="closeModal('msgModal')" class="w-12 h-12 hover:bg-white/10 rounded-full flex items-center justify-center btn-press"><i class="fa-solid fa-xmark text-2xl"></i></button>
         </div>
         <div class="p-8 max-h-[450px] overflow-y-auto custom-scroll flex flex-col gap-5">
@@ -340,13 +358,6 @@
                 <p class="font-black text-slate-800 text-lg">今日 24:00 進行伺服器備份維護</p>
                 <p class="text-sm text-slate-600 mt-2 font-medium">備份期間約 15 分鐘，屆時電子發票功能將自動切換為離線模式。</p>
             </div>
-            <div class="p-5 bg-slate-50 border-l-8 border-slate-400 rounded-2xl shadow-sm opacity-60">
-                <div class="flex justify-between mb-2">
-                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest">店鋪訊息 昨日</span>
-                </div>
-                <p class="font-black text-slate-800 text-lg">十月份員工表揚大會公告</p>
-                <p class="text-sm text-slate-600 mt-2 font-medium">請各區域負責人彙整上個月表現優異名單，於週五前提交至總部。</p>
-            </div>
         </div>
         <div class="p-8 text-center bg-slate-100 border-t border-slate-200">
             <button onclick="closeModal('msgModal')" class="px-16 py-4 bg-brand-600 text-white rounded-2xl font-black btn-press shadow-xl text-lg border-b-4 border-brand-800">我知道了</button>
@@ -359,6 +370,27 @@
     let selectedIndex = -1;
     let currentDrinkConfig = { temp: '冰', ice: '正常', sugar: '正常', note: '', productName: '', price: 0, editIndex: -1 };
     let unreadCount = 3;
+    let isConnected = true; // 系統連線狀態
+
+    // 切換連線狀態 (展示用)
+    function toggleConnection() {
+        isConnected = !isConnected;
+        const icon = document.getElementById('wifiIcon');
+        const slash = document.getElementById('wifiSlash');
+        const label = document.getElementById('connLabel');
+        
+        if (isConnected) {
+            icon.className = "fa-solid fa-wifi text-success-500 text-lg transition-all duration-300 animate-pulse";
+            slash.classList.add('hidden');
+            label.textContent = "Online";
+            label.className = "text-[10px] font-black text-slate-300 uppercase tracking-widest";
+        } else {
+            icon.className = "fa-solid fa-wifi text-slate-500 text-lg transition-all duration-300";
+            slash.classList.remove('hidden');
+            label.textContent = "Offline";
+            label.className = "text-[10px] font-black text-danger-500 uppercase tracking-widest";
+        }
+    }
 
     function checkCustomization(name, price, isDrink) {
         if (isDrink) {
@@ -504,7 +536,6 @@
 
     function openModal(id) { 
         document.getElementById(id).classList.add('active'); 
-        // 點擊跑馬燈開啟訊息中心時，隱藏通知標籤
         if (id === 'msgModal') {
             unreadCount = 0;
             document.getElementById('unreadBadge').style.display = 'none';
